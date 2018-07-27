@@ -1,0 +1,8 @@
+{
+  "PackageName" : "norelated",
+  "Configuration" : {
+    "Fields" : [
+      { "name" : "Bind",        "type" : "string",  "comment" : "Bind Address for raft service" }
+    ]
+  }
+}

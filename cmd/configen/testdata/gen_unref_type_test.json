@@ -1,0 +1,17 @@
+{
+  "PackageName" : "moretypes",
+  "Configuration" : {
+    "Fields" : [
+      { "name" : "Bind",        "type" : "string",  "comment" : "Bind Address for raft service" }
+    ]
+  },
+  "RelatedTypes" : {
+    "Credentials" : {
+      "Comment" : "Credentials define a way to configure credentials to access someother system",
+      "Fields" : [
+        { "name" : "Username", "type" : "string", "comment" : "GUS  Username" },
+        { "name" : "Password", "type" : "string", "comment" : "GUS  Password" }
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "PackageName" : "fails",
+  "Configuration" : {
+      "Fields" : [
+          { "name" : "b", "type": "Bob" }
+      ]
+  },
+  "RelatedTypes" : {
+      "Bob" : {
+          "Fields" : [
+              { "name" : "bob", "type" : "Alice" }
+          ]
+      }
+  }
+}

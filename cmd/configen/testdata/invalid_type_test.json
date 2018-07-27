@@ -1,0 +1,8 @@
+{
+  "PackageName" : "fails",
+  "Configuration" : {
+    "Fields" : [
+      { "name" : "bob", "type" : "Alice" }
+    ]
+  }
+}
