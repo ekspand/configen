@@ -68,6 +68,10 @@ func (t *typeInfo) RequiresOverrideImpl() bool {
 
 type typeInfos []*typeInfo
 
+//
+// Sort interface: Len, Less, Swap
+//
+
 func (t typeInfos) Len() int {
 	return len(t)
 }
