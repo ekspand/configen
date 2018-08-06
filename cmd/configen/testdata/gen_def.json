@@ -1,0 +1,130 @@
+{
+    "Configuration" : {
+        "Comment" : "Configuration contains the user configurable data for a Raphty node",
+        "Fields" : [
+            { "name" : "HTTP",          "type" : "HTTPServer",    "comment" : "HTTP contains the config for the Raphty HTTPS/JSON API Service"},
+            { "name" : "Audit",         "type" : "Logger",        "comment" : "Audit contains configuration for the audit logger" },
+            { "name" : "Etcd",          "type" : "Etcd",          "comment" : "Etcd contains Raft service configuration" },
+            { "name" : "PKI",           "type" : "PKI",           "comment" : "PKI contains Code Signing PKI configuration" },
+            { "name" : "CryptoProv",    "type" : "CryptoProv",    "comment" : "CryptoProv specifies the configuration for crypto providers" },
+            { "name" : "Metrics",       "type" : "Metrics",       "comment" : "Metrics specifies the metrics pipeline configuration" },
+            { "name" : "LogLevels",     "type" : "[]RepoLogLevel","comment" : "LogLevels specifies the log levels per package" },
+            { "name" : "Raphty",        "type" : "HTTPClient",    "comment" : "Server specifies configurations for the client to connect to the server"}
+        ]
+    },
+    "RelatedTypes" : {
+        "Authz" : {
+            "comment" : "Authz contains configuration for the authorization module",
+            "Fields" : [
+                { "name" : "Allow",        "type": "[]string", "comment": "Allow will allow the specified roles access to this path and its children, in format: ${path}:${role},${role}"},
+                { "name" : "AllowAny",     "type": "[]string", "comment": "AllowAny will allow any authenticated request access to this path and its children"},
+                { "name" : "AllowAnyRole", "type": "[]string", "comment": "AllowAnyRole will allow any authenticated request that include a non empty role"}
+            ]
+        },
+        "RepoLogLevel" : {
+            "comment" : "RepoLogLevel contains information about the log level per repo. Use * to set up global level.",
+            "Fields" : [
+              { "name" : "Repo", "type" : "string", "comment" : "Repo specifies the repo name, or '*' for all repos [Global]" },
+              { "name" : "Package", "type" : "string", "comment" : "Package specifies the package name" },
+              { "name" : "Level","type" : "string", "comment" : "Level specifies the log level for the repo [ERROR,WARNING,NOTICE,INFO,DEBUG,TRACE]." }
+            ]
+        },
+        "Logger" : {
+            "comment" : "Logger contains information about the configuration of a logger/log rotation",
+            "Fields" : [
+              { "name" : "Directory", "type" : "string", "comment" : "Directory contains where to store the log files" },
+              { "name" : "MaxAgeDays","type" : "int",    "comment" : "MaxAgeDays controls how old files are before deletion" },
+              { "name" : "MaxSizeMb", "type" : "int",    "comment" : "MaxSizeMb contols how large a single log file can be before its rotated" }
+            ]
+        },
+        "PrivateCert" : {
+            "Comment" : "PrivateCert contains configuration info for the signing certificate",
+            "Fields" : [
+                { "name" : "ID",             "type" : "string", "comment" : "ID specifies the identifier of the certificate to reference" },
+                { "name" : "CertFile",       "type" : "string", "comment" : "CertFile specifies location of the cert" },
+                { "name" : "KeyFile",        "type" : "string", "comment" : "KeyFile specifies location of the key" },
+                { "name" : "CABundleFile",   "type" : "string", "comment" : "CABundleFile specifies location of the CA bundle file" },
+                { "name" : "RootBundleFile", "type" : "string", "comment" : "RootBundleFile specifies location of the Trusted Root CA file" }
+            ]
+        },
+        "PKI" : {
+            "Comment" : "PKI contains configuration info for code signing PKI",
+            "Fields" : [
+                { "name" : "CAConfig",       "type" : "string",      "comment" : "CAConfig specifies file location with CA profiles" },
+                { "name" : "CsrTemplates",   "type" : "string",      "comment" : "CsrTemplates specifies file location with CSR templates" },
+                { "name" : "CRLNextUpdate",  "type" : "string",      "comment" : "CRLNextUpdate specifies value in 72h00m00s format for duration of CRL next update time" },
+                { "name" : "CRLRenewal",     "type" : "string",      "comment" : "CRLRenewal specifies value in 8h00m00s format for duration of CRL renewal before next update time" },
+                { "name" : "CRLUrlTemplate", "type" : "string",      "comment" : "CRLUrlTemplate specifies a template for CRL URL. The ${ISSUER_ID} variable will be replaced with a SHA of the issuer." },
+                { "name" : "CodesignCA",     "type" : "PrivateCert", "comment" : "CodesignCA specifies the codesign issuing CA cert" },
+                { "name" : "TimestampCA",    "type" : "PrivateCert", "comment" : "TimestampCA specifies the timestamp issuing CA cert" }
+            ]
+        },
+        "TLSInfo" : {
+            "Comment" : "TLSInfo contains configuration info for the TLS",
+            "Fields" : [
+                { "name" : "CertFile",       "type" : "string",   "comment" : "Location of the cert" },
+                { "name" : "KeyFile",        "type" : "string",   "comment" : "Location of the key" },
+                { "name" : "TrustedCAFile",  "type" : "string",   "comment" : "Location of the CA file" },
+                { "name" : "ClientCertAuth", "type" : "*bool",    "comment" : "Controls client auth" }
+            ]
+        },
+        "Etcd" : {
+            "Comment" : "Etcd contains configuration info for the underlying raft cluster",
+            "Fields" : [
+                { "name" : "InitialCluster",   "type" : "string",   "comment" : "InitialCluster specifies a set of peers to use for a new cluster"},
+                { "name" : "RevRetention",     "type" : "string",   "comment" : "RevRetention specifies revision unit for auto compaction"},
+                { "name" : "ClusterToken",     "type" : "string",   "comment" : "ClusterToken specifies a unique token for multiple clusters to distinguish and protect the data"},
+                { "name" : "AdvertPeerURLs",   "type" : "[]string", "comment" : "AdvertPeerURLs specifies URLS to advertise peers"},
+                { "name" : "PeerURLs",         "type" : "[]string", "comment" : "PeerURLs specifies URLS to listen on peers"},
+                { "name" : "AdvertClientURLs", "type" : "[]string", "comment" : "AdvertClientURLs specifies URLS to advertise clients"},
+                { "name" : "ClientURLs",       "type" : "[]string", "comment" : "ClientURLs specifies URLS to listen on clients"},
+                { "name" : "Name",             "type" : "string",   "comment" : "Specifies Raft cluster name" },
+                { "name" : "SnapshotDir",      "type" : "string",   "comment" : "SnapshotDir specifies snapshot directory name" },
+                { "name" : "BackupRetention",  "type" : "int",      "comment" : "BackupRetention specifies the age in days for snapshots backup retention" },
+                { "name" : "BackupSchedule",   "type" : "string",   "comment" : "BackupSchedule specifies a schedule for the data backup task in format documented in /pkg/tasks. If it is empty, the backup task is disabled" },
+                { "name" : "DataDir",          "type" : "string",   "comment" : "DataDir specifies a directory where to store the data files" },
+                { "name" : "MaxSnapFiles",     "type" : "int",      "comment" : "MaxSnapFiles specifies max snapshots to keep" },
+                { "name" : "Debug",            "type" : "*bool",    "comment" : "Debug specifies debug mode" },
+                { "name" : "ClientTLS",        "type" : "TLSInfo",  "comment" : "ClientTLS specifies TLS config for client/server"},
+                { "name" : "PeerTLS",          "type" : "TLSInfo",  "comment" : "PeerTLS specifies TLS config for cluster peers"}
+            ]
+        },
+        "CryptoProv" : {
+            "Comment" : "CryptoProv specifies the configuration for crypto providers",
+            "Fields" : [
+                { "name" : "Default",   "type" : "string",   "comment" : "Default specifies the location of the configuration file for default provider" },
+                { "name" : "Providers", "type" : "[]string", "comment" : "Providers specifies the list of locations of the configuration files" }
+            ]
+        },
+        "Metrics" : {
+            "Comment" : "Metrics specifies the metrics pipeline configuration",
+            "Fields" : [
+                { "name" : "ConfigFile",    "type" : "string", "comment" : "ConfigFile specifies the file containing the metrics pipeline config" },
+                { "name" : "Datacenter",    "type" : "string", "comment" : "Datacenter specifies the Datacenter where the instance is running. This value is used to override the one in the config file." }
+            ]
+        },
+        "HTTPServer" : {
+            "Comment" : "HTTPServer contains the configuration of the HTTPS API Service",
+            "Fields" : [
+              { "name" : "ServiceName",    "type" : "string",  "comment" : "ServiceName specifies name of the service: HTTP|HTTPS|WebAPI" },
+              { "name" : "Disabled",       "type" : "*bool",   "comment" : "Disabled specifies if the service is disabled" },
+              { "name" : "VIPName",        "type" : "string",  "comment" : "VIPName is the FQ name of the VIP to the Raphty cluster [this is used when building the cert requests]" },
+              { "name" : "BindAddr",       "type" : "string",  "comment" : "BindAddr is the address that the HTTPS service should be exposed on"},
+              { "name" : "ServerTLS",      "type" : "TLSInfo", "comment" : "TLS config for server"},
+              { "name" : "PackageLogger",  "type" : "string",  "comment" : "PackageLogger if set, specifies name of the package logger" },
+              { "name" : "AllowProfiling", "type" : "*bool",   "comment" : "AllowProfiling if set, will allow for per request CPU/Memory profiling triggered by the URI QueryString" },
+              { "name" : "ProfilerDir",    "type" : "string",  "comment" : "ProfilerDir specifies the directories where per-request profile information is written, if not set will write to a TMP dir" },
+              { "name" : "Services",       "type" : "[]string","comment" : "Services is a list of services to enable for this HTTP Service"},
+              { "name" : "Authz",          "type" : "Authz",   "comment" : "Authz contains configuration for the API authorization layer"},
+              { "name" : "HeartbeatSecs",  "type" : "int",     "comment" : "HeartbeatSecs specifies heartbeat interval in seconds [30 secs is a minimum]"}
+            ]
+        },
+        "HTTPClient" : {
+            "Comment" : "HTTPClient specifies configurations for the client to connect to the server",
+            "Fields" : [
+                { "name" : "Servers",   "type" : "[]string", "comment" : "Servers decribes the list of Raphty server URLs to contact"},
+                { "name" : "ClientTLS", "type" : "TLSInfo",  "comment" : "ClientTLS describes the TLS certs used to connect to Raphty"}
+            ]
+        }
+    }
+}

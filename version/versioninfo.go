@@ -19,12 +19,12 @@ type Info struct {
 // 	GIT_VERSION := $(shell git describe --dirty --always --tags --long)
 // and then using gofmt to substitute it into a template
 func (v *Info) PopulateFromBuild() {
-	fmt.Sscanf(v.Build, "%d.%d.", &v.Major, &v.Minor)
+	fmt.Sscanf(v.Build, "%d.%d-", &v.Major, &v.Minor)
 	fmt.Sscanf(v.Build, "%f-", &v.flt)
 }
 
 func (v Info) String() string {
-	return fmt.Sprintf("%d.%d (%s)", v.Major, v.Minor, v.Build)
+	return fmt.Sprintf("%d.%d", v.Major, v.Minor)
 }
 
 // GreaterOrEqual returns true if the version 'v' is the same or new that the supplied parameter 'other'

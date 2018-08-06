@@ -5,7 +5,7 @@
 // the config file is json, its consists of 3 sections
 //
 // defaults   : a Configuration instance that is the base/default configurations
-// hosts      : a mapping from host name to a named configuration [e.g. ops0-grok1-1-phx : "phx"]
+// hosts      : a mapping from host name to a named configuration [e.g. node1 : "aws"]
 // overrrides : a set of named Configuration instances that can override the some or all of the default config values
 //
 // the caller can provide a specific hostname if it chooses, otherwise the config will
@@ -63,14 +63,14 @@ func (d Duration) TimeDuration() time.Duration {
 	{{$t.PrefixedComment}}
 	type {{$n}} struct {
 		{{range $f := $t.Fields}}
-  		{{$f.PrefixedComment}}
-  		{{$f.Name}} {{$f.GoType.Name}}
+		{{$f.PrefixedComment}}
+		{{$f.Name}} {{$f.GoType.Name}}
 		{{end}}
 	}
 
 	func (c *{{$n}}) overrideFrom(o *{{$n}}) {
 		{{range $f := .Fields}}{{$f.OverrideImpl}}
-  	{{end}}
+	{{end}}
 	}
 {{end}}
 
@@ -117,7 +117,7 @@ type Configurations struct {
 	// Default contains the base configuration, this applies unless it override by a specifc named config
 	Defaults Configuration
 
-		// a map of hostname to named configuration
+	// a map of hostname to named configuration
 	Hosts map[string]string
 
 // a map of named configuration overrides

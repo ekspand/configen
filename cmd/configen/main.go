@@ -18,18 +18,18 @@ import (
 // usage config-gen -c <config_def.json> -d <dest path>
 // see the configDef type for details of what the config_def.json file should contain
 func main() {
-	def := flag.String("c", "", "filename of the configuration definition file")
-	dest := flag.String("d", ".", "directory to write generated files(s) to")
+	def := flag.String("c", "", "Filename of the configuration definition file")
+	dest := flag.String("d", ".", "Directory to write generated files(s) to")
 	// i.e. if config-gen is in foo/bar/src/github.com/ekspand/configen
 	// then you can specify -pkg foo/bar
-	pkgDir := flag.String("pkg", "", "directory containing root of path to this package [by default find it from $GOPATH]")
+	pkgDir := flag.String("pkg", "", "Directory containing root of path to this package [by default find it from $GOPATH]")
 	flag.Parse()
 
 	if *def == "" {
-		log.Fatal("Must specify the name of the configuration definition file")
+		log.Fatal("must specify the name of the configuration definition file")
 	}
 	if _, err := os.Stat(*def); os.IsNotExist(err) {
-		log.Fatalf("Unable to find supplied configuration defintition file %v", *def)
+		log.Fatalf("unable to find supplied configuration defintition file: %v", *def)
 	}
 	pdir := ""
 	if *pkgDir == "" {
@@ -137,17 +137,17 @@ func generateConfig(packageDir, defFile, destDir string) error {
 	t, err := template.ParseFiles(filepath.Join(packageDir, "cmd/configen/config.go.template"),
 		filepath.Join(packageDir, "cmd/configen/config_test.go.template"))
 	if err != nil {
-		return fmt.Errorf("Unable to open/parse template files: %v", err)
+		return fmt.Errorf("unable to open/parse template files: %v", err)
 	}
 	gen := func(destFilename, templateName string) (string, error) {
 		destFile := filepath.Join(destDir, destFilename)
 		df, err := os.Create(destFile)
 		if err != nil {
-			return "", fmt.Errorf("Unable to create destination file: %v", err)
+			return "", fmt.Errorf("unable to create destination file: %v", err)
 		}
 		defer df.Close()
 		if err := t.ExecuteTemplate(df, templateName, def); err != nil {
-			return "", fmt.Errorf("Unable to generate code: %v", err)
+			return "", fmt.Errorf("unable to generate code: %v", err)
 		}
 		return destFile, nil
 	}
@@ -192,7 +192,7 @@ func loadConfig(defFile string) (*templateData, error) {
 
 // getRelatedType will retrieve the related typeinfo based on the type name
 func (def *configDef) getRelatedType(fType string) (*structInfo, bool) {
-	if strings.Contains(fType, "[]") {
+	if strings.HasPrefix(fType, "[]") {
 		return def.getRelatedType(fType[2:])
 	}
 	rt, ok := def.RelatedTypes[fType]
@@ -288,7 +288,8 @@ func populateStructExample(t *typeInfo) bool {
 	r := &bytes.Buffer{}
 	build := func(idx int, maxFields int) (string, bool) {
 		r.Reset()
-		if strings.Contains(t.Name, "[]") {
+		isArray := strings.HasPrefix(t.Name, "[]")
+		if isArray {
 			fmt.Fprintf(r, "%s{\n{\n", t.Name)
 		} else {
 			fmt.Fprintf(r, "%s{\n", t.Name)
@@ -305,7 +306,7 @@ func populateStructExample(t *typeInfo) bool {
 			fmt.Fprintf(r, "%s%s: %s", delim, f.Name, fe[idx])
 			delim = ",\n"
 		}
-		if strings.Contains(t.Name, "[]") {
+		if isArray {
 			fmt.Fprint(r, "},\n}")
 		} else {
 			r.WriteByte('}')
