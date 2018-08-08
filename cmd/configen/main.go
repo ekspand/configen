@@ -13,17 +13,25 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+
+	"github.com/ekspand/configen/version"
 )
 
 // usage config-gen -c <config_def.json> -d <dest path>
 // see the configDef type for details of what the config_def.json file should contain
 func main() {
+	ver := flag.Bool("v", false, "Print version")
 	def := flag.String("c", "", "Filename of the configuration definition file")
 	dest := flag.String("d", ".", "Directory to write generated files(s) to")
 	// i.e. if config-gen is in foo/bar/src/github.com/ekspand/configen
 	// then you can specify -pkg foo/bar
 	pkgDir := flag.String("pkg", "", "Directory containing root of path to this package [by default find it from $GOPATH]")
 	flag.Parse()
+
+	if *ver {
+		fmt.Printf("configen %v\n", version.Current())
+		os.Exit(0)
+	}
 
 	if *def == "" {
 		log.Fatal("must specify the name of the configuration definition file")

@@ -131,7 +131,13 @@ func Test_GenCompileTest(t *testing.T) {
 }
 
 func genCompileTest(t *testing.T, tc os.FileInfo) {
-	destDir, err := ioutil.TempDir("", tc.Name())
+	pkgName := strings.TrimRight(tc.Name(), ".json")
+	destDir := pkgDir(t) + "/.tmp/" + pkgName
+
+	err := os.RemoveAll(destDir)
+	require.NoError(t, err)
+
+	err = os.MkdirAll(destDir, 0775)
 	require.NoError(t, err)
 
 	defer func() {
@@ -142,19 +148,19 @@ func genCompileTest(t *testing.T, tc os.FileInfo) {
 	err = generateConfig(pkgDir(t), "testdata/"+tc.Name(), destDir)
 	require.NoError(t, err)
 
-	goBuild(t, tc.Name(), destDir)
-	goTest(t, tc.Name(), destDir)
+	goBuild(t, pkgName, destDir)
+	goTest(t, pkgName, destDir)
 }
 
 func goBuild(t *testing.T, testName, dir string) {
-	b := exec.Command("go", "build", "-v", ".")
+	b := exec.Command("go", "build", "-a", "-v", ".")
 	b.Dir = dir
 	res, err := b.CombinedOutput()
 	require.NoError(t, err)
 
 	sr := string(res)
 	t.Logf("go build output: %s", sr)
-	assert.True(t, strings.Contains(sr, dir))
+	assert.True(t, strings.Contains(sr, testName))
 }
 
 func goTest(t *testing.T, testName, dir string) {
