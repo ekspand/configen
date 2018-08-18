@@ -1,15 +1,16 @@
 {
+    "PackageName" : "testgen",
     "Configuration" : {
         "Comment" : "Configuration contains the user configurable data for a Raphty node",
         "Fields" : [
-            { "name" : "HTTP",          "type" : "HTTPServer",    "comment" : "HTTP contains the config for the Raphty HTTPS/JSON API Service"},
-            { "name" : "Audit",         "type" : "Logger",        "comment" : "Audit contains configuration for the audit logger" },
-            { "name" : "Etcd",          "type" : "Etcd",          "comment" : "Etcd contains Raft service configuration" },
-            { "name" : "PKI",           "type" : "PKI",           "comment" : "PKI contains Code Signing PKI configuration" },
-            { "name" : "CryptoProv",    "type" : "CryptoProv",    "comment" : "CryptoProv specifies the configuration for crypto providers" },
-            { "name" : "Metrics",       "type" : "Metrics",       "comment" : "Metrics specifies the metrics pipeline configuration" },
-            { "name" : "LogLevels",     "type" : "[]RepoLogLevel","comment" : "LogLevels specifies the log levels per package" },
-            { "name" : "Raphty",        "type" : "HTTPClient",    "comment" : "Server specifies configurations for the client to connect to the server"}
+            { "name" : "HTTP",          "type" : "HTTPServer", "comment" : "HTTP contains the config for the Raphty HTTPS/JSON API Service"},
+            { "name" : "Audit",         "type" : "Logger",            "comment" : "Audit contains configuration for the audit logger" },
+            { "name" : "Etcd",          "type" : "Etcd",              "comment" : "Etcd contains Raft service configuration" },
+            { "name" : "PKI",           "type" : "PKI",               "comment" : "PKI contains Code Signing PKI configuration" },
+            { "name" : "CryptoProv",    "type" : "CryptoProv",        "comment" : "CryptoProv specifies the configuration for crypto providers" },
+            { "name" : "Metrics",       "type" : "Metrics",           "comment" : "Metrics specifies the metrics pipeline configuration" },
+            { "name" : "LogLevels",     "type" : "[]RepoLogLevel",    "comment" : "LogLevels specifies the log levels per package" },
+            { "name" : "Client",        "type" : "HTTPClient",        "comment" : "Server specifies configurations for the client to connect to the server"}
         ]
     },
     "RelatedTypes" : {
@@ -24,9 +25,9 @@
         "RepoLogLevel" : {
             "comment" : "RepoLogLevel contains information about the log level per repo. Use * to set up global level.",
             "Fields" : [
-              { "name" : "Repo", "type" : "string", "comment" : "Repo specifies the repo name, or '*' for all repos [Global]" },
+              { "name" : "Repo",    "type" : "string", "comment" : "Repo specifies the repo name, or '*' for all repos [Global]" },
               { "name" : "Package", "type" : "string", "comment" : "Package specifies the package name" },
-              { "name" : "Level","type" : "string", "comment" : "Level specifies the log level for the repo [ERROR,WARNING,NOTICE,INFO,DEBUG,TRACE]." }
+              { "name" : "Level",   "type" : "string", "comment" : "Level specifies the log level for the repo [ERROR,WARNING,NOTICE,INFO,DEBUG,TRACE]." }
             ]
         },
         "Logger" : {

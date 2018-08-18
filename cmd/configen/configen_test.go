@@ -98,24 +98,24 @@ func pkgDir(t *testing.T) string {
 func Test_InvalidType(t *testing.T) {
 	err := generateConfig(pkgDir(t), "testdata/invalid_type_test.json", ".")
 	assert.Error(t, err)
-	assert.True(t, strings.HasPrefix(err.Error(), "Field bob has type Alice which isn't valid"))
+	assert.True(t, strings.HasPrefix(err.Error(), "field bob has type Alice which isn't valid"))
 
 	err = generateConfig(pkgDir(t), "testdata/invalid_type_rel_test.json", ".")
 	assert.Error(t, err)
-	assert.True(t, strings.HasPrefix(err.Error(), "Field bob has type Alice which isn't valid"))
+	assert.True(t, strings.HasPrefix(err.Error(), "field bob has type Alice which isn't valid"))
 }
 
 func Test_InvalidJson(t *testing.T) {
 	err := generateConfig(pkgDir(t), "testdata/invalid_json_test.json", ".")
 	assert.Error(t, err)
 	assert.True(t,
-		strings.HasPrefix(err.Error(), "Unable to parse configuration definition file testdata/invalid_json_test.json: invalid character 'b' looking for beginning of object"),
+		strings.HasPrefix(err.Error(), "unable to parse configuration definition file testdata/invalid_json_test.json: invalid character 'b' looking for beginning of object"),
 		"got: "+err.Error())
 
 	err = generateConfig(pkgDir(t), "testdata/missing.json", ".")
 	assert.Error(t, err)
 	assert.True(t,
-		strings.HasPrefix(err.Error(), "Unable to open supplied configuration definition file testdata/missing.json: open testdata/missing.json: no such file or directory"),
+		strings.HasPrefix(err.Error(), "unable to open supplied configuration definition file testdata/missing.json: open testdata/missing.json: no such file or directory"),
 		"got: "+err.Error())
 }
 
@@ -156,10 +156,9 @@ func goBuild(t *testing.T, testName, dir string) {
 	b := exec.Command("go", "build", "-a", "-v", ".")
 	b.Dir = dir
 	res, err := b.CombinedOutput()
-	require.NoError(t, err)
-
 	sr := string(res)
 	t.Logf("go build output: %s", sr)
+	assert.NoError(t, err)
 	assert.True(t, strings.Contains(sr, testName))
 }
 

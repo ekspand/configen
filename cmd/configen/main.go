@@ -15,6 +15,7 @@ import (
 	"text/template"
 
 	"github.com/ekspand/configen/version"
+	"github.com/juju/errors"
 )
 
 // usage config-gen -c <config_def.json> -d <dest path>
@@ -123,7 +124,7 @@ func findPackageDir() (string, error) {
 	wd, _ := os.Getwd()
 	p, err := build.Import("github.com/ekspand/configen", wd, build.FindOnly)
 	if err != nil {
-		return "", err
+		return "", errors.Trace(err)
 	}
 	return p.Dir, nil
 }
@@ -133,12 +134,12 @@ func findPackageDir() (string, error) {
 func generateConfig(packageDir, defFile, destDir string) error {
 	def, err := loadConfig(defFile)
 	if err != nil {
-		return err
+		return errors.Trace(err)
 	}
 	if def.PackageName == "" {
 		defName, err := defaultPackageName(destDir)
 		if err != nil {
-			return err
+			return errors.Trace(err)
 		}
 		def.PackageName = defName
 	}
@@ -161,11 +162,11 @@ func generateConfig(packageDir, defFile, destDir string) error {
 	}
 	configFile, err := gen("config.go", "config.go.template")
 	if err != nil {
-		return err
+		return errors.Trace(err)
 	}
 	testFile, err := gen("config_test.go", "config_test.go.template")
 	if err != nil {
-		return err
+		return errors.Trace(err)
 	}
 	gofmt(configFile)
 	gofmt(testFile)
@@ -177,7 +178,7 @@ func generateConfig(packageDir, defFile, destDir string) error {
 func defaultPackageName(dir string) (string, error) {
 	absDest, err := filepath.Abs(dir)
 	if err != nil {
-		return "", fmt.Errorf("Unable to resolve destination directory: %v", err)
+		return "", errors.Errorf("unable to resolve destination directory: %v", err)
 	}
 	return filepath.Base(absDest), nil
 }
@@ -189,11 +190,11 @@ func loadConfig(defFile string) (*templateData, error) {
 	var def configDef
 	f, err := os.Open(defFile)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to open supplied configuration definition file %v: %v", defFile, err)
+		return nil, errors.Errorf("unable to open supplied configuration definition file %v: %v", defFile, err)
 	}
 	defer f.Close()
 	if err := json.NewDecoder(f).Decode(&def); err != nil {
-		return nil, fmt.Errorf("Unable to parse configuration definition file %v: %v", defFile, err)
+		return nil, errors.Errorf("unable to parse configuration definition file %v: %v", defFile, err)
 	}
 	return def.processConfig()
 }
@@ -218,7 +219,7 @@ func (def *configDef) processConfig() (*templateData, error) {
 		if !ok {
 			rt, ok := def.getRelatedType(f.Type)
 			if !ok {
-				return fmt.Errorf("Field %v has type %v which isn't valid (valid types are %v)", f.Name, f.Type, strings.Join(stdTypeNames(), ","))
+				return errors.Errorf("field %v has type %v which isn't valid (valid types are %v)", f.Name, f.Type, strings.Join(stdTypeNames(), ","))
 			}
 			ti = def.ensureRelatedTypeInfo(f.Type, rt)
 		}
@@ -230,7 +231,7 @@ func (def *configDef) processConfig() (*templateData, error) {
 	}
 	for idx := range def.Configuration.Fields {
 		if err := processField(&def.Configuration.Fields[idx]); err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 	}
 	def.ensureRelatedTypeInfo("Configuration", def.Configuration)
@@ -241,7 +242,7 @@ func (def *configDef) processConfig() (*templateData, error) {
 	for tn, td := range def.RelatedTypes {
 		for idx := range td.Fields {
 			if err := processField(&td.Fields[idx]); err != nil {
-				return nil, err
+				return nil, errors.Trace(err)
 			}
 		}
 		res.Structs[tn] = td
@@ -284,7 +285,7 @@ func (def *configDef) populateStructExamples() {
 			missing = append(missing, t.Name)
 		}
 	}
-	log.Fatalf("After %d tries, still unable to generate all the ExampleValues, %v still don't have any", len(def.customTypeInfos), missing)
+	log.Fatalf("after %d tries, still unable to generate all the ExampleValues, %v still don't have any", len(def.customTypeInfos), missing)
 }
 
 // populateStructExample updates the typeInfo with ExampleValues and returns true
@@ -348,10 +349,11 @@ func (def *configDef) ensureRelatedTypeInfo(name string, structDef *structInfo) 
 		overrideStyle: osStruct,
 		structDef:     structDef,
 	}
-	if strings.Contains(name, "[]") {
-		t.OverrideFunc = "override" + name[2:] + "Slice"
+	if strings.HasPrefix(name, "[]") {
+		typ := name[2:]
+		t.OverrideFunc = "override" + typ + "Slice"
 		t.overrideStyle = osLen
-		def.ensureRelatedTypeInfo(name[2:], structDef)
+		def.ensureRelatedTypeInfo(typ, structDef)
 	} else {
 		structDef.GoType = &t
 	}
