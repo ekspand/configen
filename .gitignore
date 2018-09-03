@@ -1,6 +1,7 @@
 /.gopath
 /.coverage
 /.rpm
+/.tools
 /vendor
 
 pkg/

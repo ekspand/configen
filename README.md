@@ -15,11 +15,12 @@ Or as part of `go generate`
 
     go generate ./...
 
-## Build
+## Contribution
 
 Before openning VSCODE or running make, run once:
-    . ./vscode.sh
+    ./vscode.sh
 
+* `make all` complete build and test
 * `make get` fetches the pinned dependencies from repos
 * `make devtools` get the dev tools for local development in VSCODE
 * `make build` build the executable tool
@@ -53,6 +54,6 @@ Review coverage report:
 
     make covtest coverage
 
-### Current Travis-CI build status
+### Current build status
 
 [![Build Status](https://travis-ci.org/go-phorce/configen.svg?branch=master)](https://travis-ci.org/go-phorce/configen)
