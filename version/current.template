@@ -5,6 +5,7 @@ package version
 var currentVersion = Info{
 	Major: 0,
 	Minor: 0,
+    Commit: 0,
 	Build: "GIT_VERSION",
 }
 
