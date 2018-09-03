@@ -38,10 +38,10 @@ endef
 # it builds a repo url from the first 2 params, the 3rd param is the directory to place the repo
 # and the final param is the commit to checkout [a sha or branch or tag]
 define gitclone
-	@echo "Checking/Updating dependency git@$(1):$(2).git"
-	@if [ -d $(3) ]; then cd $(3) && git fetch origin; fi			# update from remote if we've already cloned it
-	@if [ ! -d $(3) ]; then git clone -q -n git@$(1):$(2).git $(3); fi  # clone a new copy
-	@cd $(3) && git checkout -q $(4)								# checkout out specific commit
+	@echo "Checking/Updating dependency https://$(1)/$(2)"
+	@if [ -d $(3) ]; then cd $(3) && git fetch origin; fi					# update from remote if we've already cloned it
+	@if [ ! -d $(3) ]; then git clone -q -n https://$(1)/$(2) $(3); fi  # clone a new copy
+	@cd $(3) && git checkout -q $(4)										# checkout out specific commit
 	@sleep ${CLONE_DELAY}
 endef
 
