@@ -5,7 +5,7 @@ ROOT=`pwd`
 GOROOT=`go env GOROOT`
 echo "Root=$ROOT"
 
-ORG_NAME=github.com/ekspand
+ORG_NAME=github.com/go-phorce
 PROJ_NAME=configen
 REPO_NAME=$ORG_NAME/$PROJ_NAME
 

@@ -1,6 +1,6 @@
 include common.mk
 
-ORG_NAME=github.com/ekspand
+ORG_NAME=github.com/go-phorce
 PROJ_NAME=configen
 REPO_NAME=${ORG_NAME}/${PROJ_NAME}
 PROJ_PACKAGE := ${REPO_NAME}
@@ -105,7 +105,7 @@ gettools:
 	$(call gitclone,${GITHUB_HOST},golang/lint,              ${TOOLS_SRC}/github.com/golang/lint,              3ea3fa98a8104b2c8f8a7bffaebc7e54dddf99e1)
 	$(call gitclone,${GITHUB_HOST},jteeuwen/go-bindata,      ${TOOLS_SRC}/github.com/jteeuwen/go-bindata,      v3.0.7)
 	$(call gitclone,${GITHUB_HOST},jstemmer/go-junit-report, ${TOOLS_SRC}/github.com/jstemmer/go-junit-report, 385fac0ced9acaae6dc5b39144194008ded00697)
-	$(call gitclone,${GITHUB_HOST},ekspand/cov-report,       ${TOOLS_SRC}/github.com/ekspand/cov-report,       master)
+	$(call gitclone,${GITHUB_HOST},go-phorce/cov-report,     ${TOOLS_SRC}/github.com/go-phorce/cov-report,     master)
 
 tools: gettools
 	GOPATH=${TOOLS_PATH} go install golang.org/x/tools/cmd/stringer
@@ -115,7 +115,7 @@ tools: gettools
 	GOPATH=${TOOLS_PATH} go install github.com/golang/lint/golint
 	GOPATH=${TOOLS_PATH} go install github.com/jteeuwen/go-bindata/...
 	GOPATH=${TOOLS_PATH} go install github.com/jstemmer/go-junit-report
-	GOPATH=${TOOLS_PATH} go install github.com/ekspand/cov-report/cmd/cov-report
+	GOPATH=${TOOLS_PATH} go install github.com/go-phorce/cov-report/cmd/cov-report
 
 getdevtools:
 	$(call gitclone,${GITHUB_HOST},golang/tools,                ${GOPATH}/src/golang.org/x/tools,                  master)
@@ -142,15 +142,15 @@ devtools: getdevtools
 	go install github.com/sqs/goreturns
 
 get:
+	$(call gitclone,${GITHUB_HOST},juju/errors,           ${VENDOR_SRC}/github.com/juju/errors,         c7d06af17c68cd34c835053720b21f6549d9b0ee)
 	$(call gitclone,${GITHUB_HOST},alecthomas/kingpin,    ${VENDOR_SRC}/gopkg.in/alecthomas/kingpin,    a39589180ebd6bbf43076e514b55f20a95d43086)
 	$(call gitclone,${GITHUB_HOST},alecthomas/template,   ${VENDOR_SRC}/github.com/alecthomas/template, a0175ee3bccc567396460bf5acd36800cb10c49c)
 	$(call gitclone,${GITHUB_HOST},alecthomas/units,      ${VENDOR_SRC}/github.com/alecthomas/units,    2efee857e7cfd4f3d0138cc3cbb1b4966962b93a)
 	$(call gitclone,${GITHUB_HOST},stretchr/testify,      ${VENDOR_SRC}/github.com/stretchr/testify,    4d4bfba8f1d1027c4fdbe371823030df51419987)
 	$(call gitclone,${GITHUB_HOST},ugorji/go,             ${VENDOR_SRC}/github.com/ugorji/go,           5cd0f2b3b6cca8e3a0a4101821e41a73cb59bed6)
-	$(call gitclone,${GITHUB_HOST},golang/crypto,         ${VENDOR_SRC}/golang.org/x/crypto,            453249f01cfeb54c3d549ddb75ff152ca243f9d8)
-	$(call gitclone,${GITHUB_HOST},golang/net,            ${VENDOR_SRC}/golang.org/x/net,               66aacef3dd8a676686c7ae3716979581e8b03c47)
-	$(call gitclone,${GITHUB_HOST},golang/text,           ${VENDOR_SRC}/golang.org/x/text,              b19bf474d317b857955b12035d2c5acb57ce8b01)
-	$(call gitclone,${GITHUB_HOST},juju/errors,           ${VENDOR_SRC}/github.com/juju/errors,         c7d06af17c68cd34c835053720b21f6549d9b0ee)
+	#$(call gitclone,${GITHUB_HOST},golang/crypto,         ${VENDOR_SRC}/golang.org/x/crypto,            453249f01cfeb54c3d549ddb75ff152ca243f9d8)
+	#$(call gitclone,${GITHUB_HOST},golang/net,            ${VENDOR_SRC}/golang.org/x/net,               66aacef3dd8a676686c7ae3716979581e8b03c47)
+	#$(call gitclone,${GITHUB_HOST},golang/text,           ${VENDOR_SRC}/golang.org/x/text,              b19bf474d317b857955b12035d2c5acb57ce8b01)
 
 vendor: get
 

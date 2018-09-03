@@ -14,7 +14,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/ekspand/configen/version"
+	"github.com/go-phorce/configen/version"
 	"github.com/juju/errors"
 )
 
@@ -24,7 +24,7 @@ func main() {
 	ver := flag.Bool("v", false, "Print version")
 	def := flag.String("c", "", "Filename of the configuration definition file")
 	dest := flag.String("d", ".", "Directory to write generated files(s) to")
-	// i.e. if config-gen is in foo/bar/src/github.com/ekspand/configen
+	// i.e. if config-gen is in foo/bar/src/github.com/go-phorce/configen
 	// then you can specify -pkg foo/bar
 	pkgDir := flag.String("pkg", "", "Directory containing root of path to this package [by default find it from $GOPATH]")
 	flag.Parse()
@@ -49,7 +49,7 @@ func main() {
 			os.Exit(-1)
 		}
 	} else {
-		pdir = filepath.Join(*pkgDir, "src/github.com/ekspand/configen")
+		pdir = filepath.Join(*pkgDir, "src/github.com/go-phorce/configen")
 	}
 	err := generateConfig(pdir, *def, *dest)
 	if err != nil {
@@ -122,7 +122,7 @@ type templateData struct {
 // [this is used to load the template files from]
 func findPackageDir() (string, error) {
 	wd, _ := os.Getwd()
-	p, err := build.Import("github.com/ekspand/configen", wd, build.FindOnly)
+	p, err := build.Import("github.com/go-phorce/configen", wd, build.FindOnly)
 	if err != nil {
 		return "", errors.Trace(err)
 	}

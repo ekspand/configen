@@ -1,11 +1,11 @@
 # configen
 
 Tool to generate a configuration system, define your config types, and have everything code generated from it. Supports parameter overrides based on hostname, or from an environment variable.
-Expecting GOPATH location is github.com/ekspand/configen
+Expecting GOPATH location is github.com/go-phorce/configen
 
 ## Usage
 
-    go install github.com/ekspand/configen/cmd/configen
+    go install github.com/go-phorce/configen/cmd/configen
 
 The tool can be used directly
 
