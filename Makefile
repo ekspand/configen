@@ -1,9 +1,4 @@
-include common.mk
-
-ORG_NAME=github.com/go-phorce
-PROJ_NAME=configen
-REPO_NAME=${ORG_NAME}/${PROJ_NAME}
-PROJ_PACKAGE := ${REPO_NAME}
+include .project/common.mk
 
 GOFILES = $(shell find . -type f -name '*.go')
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.tools/*" -not -path "./.gopath/*")
@@ -220,4 +215,3 @@ citest: vet lint
 	$(call go_test_cover_junit,${TEST_DIR},${GOPATH},${TEST_RACEFLAG},${TEST_GORACEOPTIONS},.,${COVERAGE_EXCLUSIONS})
 	cov-report -fmt xml -o ${COVPATH}/coverage.xml -ex ${COVERAGE_EXCLUSIONS} -cc ${COVPATH}/combined.out ${COVPATH}/cc*.out
 	cov-report -fmt ds -o ${COVPATH}/summary.xml -ex ${COVERAGE_EXCLUSIONS} ${COVPATH}/cc*.out
-

@@ -4,6 +4,7 @@
 /.tools
 /vendor
 
+coverage.out
 pkg/
 bin/
 .idea

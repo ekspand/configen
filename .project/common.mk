@@ -1,8 +1,14 @@
 # common.mk: this contains commonly used helpers for makefiles.
-
-## Common variables
 SHELL=/bin/bash
 ROOT := $(shell pwd)
+
+## Project variables
+ORG_NAME=$(shell .project/var.sh project_org)
+PROJ_NAME=$(shell .project/var.sh project_name)
+REPO_NAME=${ORG_NAME}/${PROJ_NAME}
+PROJ_PACKAGE := ${REPO_NAME}
+
+## Common variables
 HOSTNAME := $(shell echo $$HOSTNAME)
 UNAME := $(shell uname)
 GITHUB_HOST := github.com
@@ -10,11 +16,9 @@ GOLANG_HOST := golang.org
 GIT_DIRTY := $(shell git describe --dirty --always --tags --long | grep -q -e '-dirty' && echo -$$HOSTNAME)
 GIT_HASH := $(shell git rev-parse --short HEAD)
 LATEST_TAG := $(shell git describe --tags --abbrev=0)
-COMMITS_SINCE_TAG := $(shell git rev-list "${LATEST_TAG}"... | wc -l)# number of commits since latest tag
-COMMITS_COUNT := $(shell git rev-list --count master)# number of commits in master
-RPM_ITERATION := $(shell git rev-list HEAD | wc -l)# number of commits in repo
-RPM_VERSION  := $(shell printf %s-%d ${LATEST_TAG} ${COMMITS_SINCE_TAG})#newest version # tag
-GIT_VERSION := ${RPM_VERSION}-${COMMITS_COUNT}${GIT_DIRTY}
+COMMITS_COUNT := $(shell git rev-list --count ${GIT_HASH})# number of commits in master
+PROD_VERSION := $(shell cat .VERSION)
+GIT_VERSION := $(shell printf %s-%d%s ${PROD_VERSION} ${COMMITS_COUNT} ${GIT_DIRTY})
 COVPATH=.coverage
 
 # SSH clones over the VPN get killed by some kind of DOS protection run amook
@@ -39,9 +43,9 @@ endef
 # and the final param is the commit to checkout [a sha or branch or tag]
 define gitclone
 	@echo "Checking/Updating dependency https://$(1)/$(2)"
-	@if [ -d $(3) ]; then cd $(3) && git fetch origin; fi					# update from remote if we've already cloned it
+	@if [ -d $(3) ]; then cd $(3) && git fetch origin; fi			# update from remote if we've already cloned it
 	@if [ ! -d $(3) ]; then git clone -q -n https://$(1)/$(2) $(3); fi  # clone a new copy
-	@cd $(3) && git checkout -q $(4)										# checkout out specific commit
+	@cd $(3) && git checkout -q $(4)								# checkout out specific commit
 	@sleep ${CLONE_DELAY}
 endef
 
@@ -85,7 +89,8 @@ define go_test_cover
 		; done \
 		&& echo "Completed with status code $$exitCode" \
 		&& if [ $$exitCode -ne "0" ] ; then echo "Test failed, exit code: $$exitCode" && exit $$exitCode ; fi )
-	${TOOLS_BIN}/cov-report -ex $(6) -cc ${COVPATH}/combined.out ${COVPATH}/cc*.out
+	cov-report -ex $(6) -cc ${COVPATH}/combined.out ${COVPATH}/cc*.out
+	cp ${COVPATH}/combined.out ${ROOT}/coverage.out
 endef
 
 # same as go_test_cover except it also generates results in the junit format
@@ -99,6 +104,6 @@ define go_test_cover_junit
 			>> ${COVPATH}/citest_$$(echo $(5) | tr "/" "_").log \
 			|| failure=1; \
     done <<< "$$(cd $(1) && go list $(5)/...)" && \
-    cat ${COVPATH}/citest_$$(echo $(5) | tr "/" "_").log | ${TOOLS_BIN}/go-junit-report >> ${COVPATH}/citest_$$(echo $(5) | tr "/" "_").xml && \
+    cat ${COVPATH}/citest_$$(echo $(5) | tr "/" "_").log | go-junit-report >> ${COVPATH}/citest_$$(echo $(5) | tr "/" "_").xml && \
     exit $$failure
 endef
