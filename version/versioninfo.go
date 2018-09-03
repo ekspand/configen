@@ -6,25 +6,27 @@ import (
 
 // Info describes a version of an executable
 type Info struct {
-	Major uint   `json:"major"`
-	Minor uint   `json:"minor"`
-	Build string `json:"build"`
-	flt   float32
+	Major  uint   `json:"major"`
+	Minor  uint   `json:"minor"`
+	Commit uint   `json:"commi"`
+	Build  string `json:"build"`
+	flt    float32
 }
 
 // PopulateFromBuild will parse the major/minor values from the build string
 // the build string is expected to be in the format
-// major.minor-build
+// major.minor-commit
 // and can be populated from git using
 // 	GIT_VERSION := $(shell git describe --dirty --always --tags --long)
 // and then using gofmt to substitute it into a template
 func (v *Info) PopulateFromBuild() {
-	fmt.Sscanf(v.Build, "%d.%d-", &v.Major, &v.Minor)
-	fmt.Sscanf(v.Build, "%f-", &v.flt)
+	fmt.Sscanf(v.Build, "v%d.%d-%d", &v.Major, &v.Minor, &v.Commit)
+	fmt.Sscanf(v.Build, "v%f-", &v.flt)
+	v.flt = v.flt*1000000 + float32(v.Commit)
 }
 
 func (v Info) String() string {
-	return fmt.Sprintf("%d.%d", v.Major, v.Minor)
+	return v.Build
 }
 
 // GreaterOrEqual returns true if the version 'v' is the same or new that the supplied parameter 'other'

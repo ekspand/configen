@@ -3,9 +3,10 @@ package version
 // GENERATED FILE DO NOT CHECK IN TO GIT!
 
 var currentVersion = Info{
-	Major: 0,
-	Minor: 0,
-	Build: "0.1-1-111",
+	Major:  0,
+	Minor:  0,
+	Commit: 0,
+	Build:  "v0.2-16",
 }
 
 func init() {
