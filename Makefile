@@ -5,32 +5,9 @@ GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -
 
 export PROJROOT=$(ROOT)
 
-# if PROJ_GOPATH is defined,
-# then GOPATH and GOROOT are expected to be set, and symbolic link to the project must be already created;
-# otherwise create necessary environment
-ifndef PROJ_GOPATH
-export PROJ_GOPATH_DIR=.gopath
-export PROJ_GOPATH := ${ROOT}/${PROJ_GOPATH_DIR}
-export GOPATH := ${PROJ_GOPATH}
-export GOROOT := $(shell go env GOROOT)
-export PATH := ${PATH}:${GOPATH}/bin:${GOROOT}/bin
-endif
-
-PROJ_REPO_TARGET := "${PROJ_GOPATH_DIR}/src/${REPO_NAME}"
-
 # location for vendor files
 VENDOR_SRC=vendor
 DOCKER_BIN=.docker
-
-# tools path
-export TOOLS_PATH := ${PROJROOT}/.tools
-export TOOLS_SRC := ${TOOLS_PATH}/src
-export TOOLS_BIN := ${TOOLS_PATH}/bin
-export PATH := ${PATH}:${TOOLS_BIN}
-
-# test path
-TEST_GOPATH := "${PROJ_GOPATH}"
-TEST_DIR := "${PROJ_REPO_TARGET}"
 
 COVERAGE_EXCLUSIONS="/rt\.go|/bindata\.go"
 
@@ -67,10 +44,6 @@ vars:
 	[ -d "${PROJ_REPO_TARGET}" ] && echo "Link exists: ${PROJ_REPO_TARGET}" || echo "Link does not exist: ${PROJ_REPO_TARGET}"
 
 all: clean gopath vendor tools generate build test
-
-jenkins: purge gopath vendor tools generate build citest cicoverage
-
-jenkinsint: purge gopath vendor tools generate build citestint
 
 clean:
 	go clean
