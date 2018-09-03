@@ -15,6 +15,13 @@ Or as part of `go generate`
 
     go generate ./...
 
+## Dependencies
+
+    go get github.com/juju/errors
+    go get gopkg.in/alecthomas/kingpin
+    go get github.com/alecthomas/template
+    go get github.com/alecthomas/units
+
 ## Contribution
 
 Before openning VSCODE or running make, run once:
