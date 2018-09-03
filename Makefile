@@ -6,12 +6,12 @@ REPO_NAME=${ORG_NAME}/${PROJ_NAME}
 PROJ_PACKAGE := ${REPO_NAME}
 
 GOFILES = $(shell find . -type f -name '*.go')
-GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.gopath/*")
+GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.tools/*" -not -path "./.gopath/*")
 
 export PROJROOT=$(ROOT)
 
 # if PROJ_GOPATH is defined,
-# then GOPATH and GOROOT are expected to be set, and symbolic link to Stampy must be created;
+# then GOPATH and GOROOT are expected to be set, and symbolic link to the project must be already created;
 # otherwise create necessary environment
 ifndef PROJ_GOPATH
 export PROJ_GOPATH_DIR=.gopath
@@ -28,9 +28,10 @@ VENDOR_SRC=vendor
 DOCKER_BIN=.docker
 
 # tools path
-export TOOLS_PATH := ${PROJ_GOPATH}/src/${REPO_NAME}/${VENDOR_SRC}/.tools
+export TOOLS_PATH := ${PROJROOT}/.tools
 export TOOLS_SRC := ${TOOLS_PATH}/src
 export TOOLS_BIN := ${TOOLS_PATH}/bin
+export PATH := ${PATH}:${TOOLS_BIN}
 
 # test path
 TEST_GOPATH := "${PROJ_GOPATH}"
@@ -147,10 +148,6 @@ get:
 	$(call gitclone,${GITHUB_HOST},alecthomas/template,   ${VENDOR_SRC}/github.com/alecthomas/template, a0175ee3bccc567396460bf5acd36800cb10c49c)
 	$(call gitclone,${GITHUB_HOST},alecthomas/units,      ${VENDOR_SRC}/github.com/alecthomas/units,    2efee857e7cfd4f3d0138cc3cbb1b4966962b93a)
 	$(call gitclone,${GITHUB_HOST},stretchr/testify,      ${VENDOR_SRC}/github.com/stretchr/testify,    4d4bfba8f1d1027c4fdbe371823030df51419987)
-	$(call gitclone,${GITHUB_HOST},ugorji/go,             ${VENDOR_SRC}/github.com/ugorji/go,           5cd0f2b3b6cca8e3a0a4101821e41a73cb59bed6)
-	#$(call gitclone,${GITHUB_HOST},golang/crypto,         ${VENDOR_SRC}/golang.org/x/crypto,            453249f01cfeb54c3d549ddb75ff152ca243f9d8)
-	#$(call gitclone,${GITHUB_HOST},golang/net,            ${VENDOR_SRC}/golang.org/x/net,               66aacef3dd8a676686c7ae3716979581e8b03c47)
-	#$(call gitclone,${GITHUB_HOST},golang/text,           ${VENDOR_SRC}/golang.org/x/text,              b19bf474d317b857955b12035d2c5acb57ce8b01)
 
 vendor: get
 
@@ -192,12 +189,15 @@ fmt:
 	gofmt -s -l -w ${GOFILES_NOVENDOR}
 
 test: fmt vet lint
+	echo "Running test"
 	cd ${TEST_DIR} && go test ${TEST_RACEFLAG} ./...
 
 testshort:
+	echo "Running testshort"
 	cd ${TEST_DIR} && go test ${TEST_RACEFLAG} ./... --test.short
 
 covtest: fmt vet lint
+	echo "Running covtest"
 	$(call go_test_cover,${TEST_DIR},${TEST_GOPATH},${TEST_RACEFLAG},${TEST_GORACEOPTIONS},.,${COVERAGE_EXCLUSIONS})
 
 # Runs integration tests as well
@@ -218,6 +218,6 @@ cicoverage:
 # this unitest step can skip coverage reporting which speeds it up massively
 citest: vet lint
 	$(call go_test_cover_junit,${TEST_DIR},${GOPATH},${TEST_RACEFLAG},${TEST_GORACEOPTIONS},.,${COVERAGE_EXCLUSIONS})
-	${TOOLS_BIN}/cov-report -fmt xml -o ${COVPATH}/coverage.xml -ex ${COVERAGE_EXCLUSIONS} -cc ${COVPATH}/combined.out ${COVPATH}/cc*.out
-	${TOOLS_BIN}/cov-report -fmt ds -o ${COVPATH}/summary.xml -ex ${COVERAGE_EXCLUSIONS} ${COVPATH}/cc*.out
+	cov-report -fmt xml -o ${COVPATH}/coverage.xml -ex ${COVERAGE_EXCLUSIONS} -cc ${COVPATH}/combined.out ${COVPATH}/cc*.out
+	cov-report -fmt ds -o ${COVPATH}/summary.xml -ex ${COVERAGE_EXCLUSIONS} ${COVPATH}/cc*.out
 
