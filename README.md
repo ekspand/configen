@@ -52,3 +52,9 @@ Optionally run golang race detector with test targets by setting RACE flag:
 Review coverage report:
 
     make covtest coverage
+
+### Current Travis-CI build status
+
+| Develop Branch | Master Branch |
+---|---|---
+| [![Develop Branch Build Status](https://travis-ci.org/go-phorce/configen.svg?branch=dev)](https://travis-ci.org/kgo-phorce/configen/builds) | [![Master Branch Build Status](https://travis-ci.org/go-phorce/configen.svg?branch=master)](https://travis-ci.org/go-phorce/configen/builds) |
