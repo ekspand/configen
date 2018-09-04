@@ -15,11 +15,33 @@ GITHUB_HOST := github.com
 GOLANG_HOST := golang.org
 GIT_DIRTY := $(shell git describe --dirty --always --tags --long | grep -q -e '-dirty' && echo -$$HOSTNAME)
 GIT_HASH := $(shell git rev-parse --short HEAD)
-LATEST_TAG := $(shell git describe --tags --abbrev=0)
 COMMITS_COUNT := $(shell git rev-list --count ${GIT_HASH})# number of commits in master
 PROD_VERSION := $(shell cat .VERSION)
 GIT_VERSION := $(shell printf %s-%d%s ${PROD_VERSION} ${COMMITS_COUNT} ${GIT_DIRTY})
 COVPATH=.coverage
+
+# if PROJ_GOPATH is defined,
+# then GOPATH and GOROOT are expected to be set, and symbolic link to the project must be already created;
+# otherwise create necessary environment
+ifndef PROJ_GOPATH
+export PROJ_GOPATH_DIR=.gopath
+export PROJ_GOPATH := ${ROOT}/${PROJ_GOPATH_DIR}
+export GOPATH := ${PROJ_GOPATH}
+export GOROOT := $(shell go env GOROOT)
+export PATH := ${PATH}:${GOPATH}/bin:${GOROOT}/bin
+endif
+
+PROJ_REPO_TARGET := "${PROJ_GOPATH_DIR}/src/${REPO_NAME}"
+
+# tools path
+export TOOLS_PATH := ${PROJROOT}/.tools
+export TOOLS_SRC := ${TOOLS_PATH}/src
+export TOOLS_BIN := ${TOOLS_PATH}/bin
+export PATH := ${PATH}:${TOOLS_BIN}
+
+# test path
+TEST_GOPATH := "${PROJ_GOPATH}"
+TEST_DIR := "${PROJ_REPO_TARGET}"
 
 # SSH clones over the VPN get killed by some kind of DOS protection run amook
 # set clone_delay to add a delay between each git clone/fetch to work around that
@@ -34,7 +56,7 @@ CLONE_DELAY ?= 0
 # of the command if there are some
 # it runs git log in the relevant directory to show the log entries betweeen HEAD and origin/master
 define show_dep_updates
-	find $(1) -name .git -exec sh -c 'cd {}/.. && [[ $$(git log --oneline HEAD...origin/master | wc -l) -gt 0 ]] && echo "\n" && pwd && git log --pretty=oneline --abbrev=0 --graph HEAD...origin/master' \;
+	find $(1) -name .git -exec sh -c 'cd {}/.. && [ $$(git log --oneline HEAD...origin/master | wc -l) -gt 0 ] && echo "\n" && pwd && git --no-pager log --pretty=oneline --abbrev=0 --graph HEAD...origin/master' \;
 endef
 
 # gitclone is a function that will do a clone, or a fetch / checkout [if we'd previous done a clone]
