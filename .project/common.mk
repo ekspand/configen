@@ -20,6 +20,8 @@ PROD_VERSION := $(shell cat .VERSION)
 GIT_VERSION := $(shell printf %s-%d%s ${PROD_VERSION} ${COMMITS_COUNT} ${GIT_DIRTY})
 COVPATH=.coverage
 
+export PROJROOT=$(ROOT)
+
 # if PROJ_GOPATH is defined,
 # then GOPATH and GOROOT are expected to be set, and symbolic link to the project must be already created;
 # otherwise create necessary environment
@@ -111,8 +113,7 @@ define go_test_cover
 		; done \
 		&& echo "Completed with status code $$exitCode" \
 		&& if [ $$exitCode -ne "0" ] ; then echo "Test failed, exit code: $$exitCode" && exit $$exitCode ; fi )
-	cov-report -ex $(6) -cc ${COVPATH}/combined.out ${COVPATH}/cc*.out
-	cp ${COVPATH}/combined.out ${ROOT}/coverage.out
+	${TOOLS_BIN}/cov-report -ex $(6) -cc ${COVPATH}/combined.out ${COVPATH}/cc*.out
 endef
 
 # same as go_test_cover except it also generates results in the junit format
@@ -126,6 +127,6 @@ define go_test_cover_junit
 			>> ${COVPATH}/citest_$$(echo $(5) | tr "/" "_").log \
 			|| failure=1; \
     done <<< "$$(cd $(1) && go list $(5)/...)" && \
-    cat ${COVPATH}/citest_$$(echo $(5) | tr "/" "_").log | go-junit-report >> ${COVPATH}/citest_$$(echo $(5) | tr "/" "_").xml && \
+    cat ${COVPATH}/citest_$$(echo $(5) | tr "/" "_").log | ${TOOLS_BIN}/go-junit-report >> ${COVPATH}/citest_$$(echo $(5) | tr "/" "_").xml && \
     exit $$failure
 endef
