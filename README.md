@@ -18,9 +18,6 @@ Or as part of `go generate`
 ## Dependencies
 
     go get github.com/juju/errors
-    go get gopkg.in/alecthomas/kingpin
-    go get github.com/alecthomas/template
-    go get github.com/alecthomas/units
 
 ## Contribution
 

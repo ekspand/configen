@@ -3,12 +3,6 @@ include .project/common.mk
 GOFILES = $(shell find . -type f -name '*.go')
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.tools/*" -not -path "./.gopath/*")
 
-export PROJROOT=$(ROOT)
-
-# location for vendor files
-VENDOR_SRC=vendor
-DOCKER_BIN=.docker
-
 COVERAGE_EXCLUSIONS="/rt\.go|/bindata\.go"
 
 # flags
@@ -43,7 +37,7 @@ vars:
 	echo "VERSION=$(GIT_VERSION)"
 	[ -d "${PROJ_REPO_TARGET}" ] && echo "Link exists: ${PROJ_REPO_TARGET}" || echo "Link does not exist: ${PROJ_REPO_TARGET}"
 
-all: clean gopath vendor tools generate build test
+all: clean gopath tools generate build test
 
 clean:
 	go clean
@@ -100,6 +94,7 @@ getdevtools:
 	$(call gitclone,${GITHUB_HOST},pkg/errors,                  ${GOPATH}/src/github.com/pkg/errors,               master)
 
 devtools: getdevtools
+	go get -u github.com/golang/dep/cmd/dep
 	go install golang.org/x/tools/cmd/fiximports
 	go install golang.org/x/tools/cmd/goimports
 	go install github.com/derekparker/delve/cmd/dlv
@@ -109,15 +104,6 @@ devtools: getdevtools
 	go install github.com/acroca/go-symbols
 	go install github.com/ramya-rao-a/go-outline
 	go install github.com/sqs/goreturns
-
-get:
-	$(call gitclone,${GITHUB_HOST},juju/errors,           ${VENDOR_SRC}/github.com/juju/errors,         c7d06af17c68cd34c835053720b21f6549d9b0ee)
-	$(call gitclone,${GITHUB_HOST},alecthomas/kingpin,    ${VENDOR_SRC}/gopkg.in/alecthomas/kingpin,    a39589180ebd6bbf43076e514b55f20a95d43086)
-	$(call gitclone,${GITHUB_HOST},alecthomas/template,   ${VENDOR_SRC}/github.com/alecthomas/template, a0175ee3bccc567396460bf5acd36800cb10c49c)
-	$(call gitclone,${GITHUB_HOST},alecthomas/units,      ${VENDOR_SRC}/github.com/alecthomas/units,    2efee857e7cfd4f3d0138cc3cbb1b4966962b93a)
-	$(call gitclone,${GITHUB_HOST},stretchr/testify,      ${VENDOR_SRC}/github.com/stretchr/testify,    4d4bfba8f1d1027c4fdbe371823030df51419987)
-
-vendor: get
 
 generate:
 	PATH=${TOOLS_BIN}:${PATH} go generate ./...
