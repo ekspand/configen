@@ -14,7 +14,7 @@ go:
 git:
   depth: 1
 
-install: make gopath tools
+install: make vars gopath tools
 
 # Don't email me the results of the test runs.
 notifications:
@@ -35,4 +35,4 @@ notifications:
 # failing test, we want to see both. Configure golangci-lint with a
 # .golangci.yml file at the top level of your repo.
 script:
-  - make covtest # Run all the tests with coverage report
+  - make vars generate build covtest # Run all the tests with coverage report

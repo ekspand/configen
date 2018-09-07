@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # this script creates PROJ_GOPATH folder for the project in GOPATH
 
 ROOT=`pwd`
@@ -8,9 +8,12 @@ echo "Working in $ROOT"
 # include parse_yaml function
 source .project/yaml.sh
 create_variables ./config.yml
+
 ORG_NAME=$project_org
 PROJ_NAME=$project_name
-REPO_NAME=$ORG_NAME/$PROJ_NAME	REPO_NAME=$ORG_NAME/$PROJ_NAME
+REPO_NAME=$ORG_NAME/$PROJ_NAME
+
+echo "Repo: $REPO_NAME"
 
 if [[ "$PWD" = *src/$REPO_NAME ]]; then
 #
@@ -59,5 +62,5 @@ export PATH=$PATH:$PROJ_GOPATH/bin:$PROJ_GOPATH/.tools/bin:$GOROOT/bin
 env | grep GO
 popd
 
-code  "$PROJ_GOPATH/src/$REPO_NAME" & make devtools
+code "$PROJ_GOPATH/src/$REPO_NAME" & make devtools
 fi
