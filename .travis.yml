@@ -28,11 +28,11 @@ notifications:
 #   dep ensure -add github.com/golangci/golangci-lint/cmd/golangci-lint
 # ...and adding this to your Gopkg.toml file.
 #   required = ["github.com/golangci/golangci-lint/cmd/golangci-lint"]
-#before_script:
-#  - make vendor
+before_script:
+  - make vars generate
 
 # script always runs to completion (set +e). If we have linter issues AND a
 # failing test, we want to see both. Configure golangci-lint with a
 # .golangci.yml file at the top level of your repo.
 script:
-  - make vars generate build covtest # Run all the tests with coverage report
+  - make vars build covtest coveralls # Run all the tests with coverage report
