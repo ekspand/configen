@@ -1,5 +1,8 @@
 # configen
 
+[![Build Status](https://travis-ci.org/go-phorce/configen.svg?branch=master)](https://travis-ci.org/go-phorce/configen)
+[![Coverage Status](https://coveralls.io/repos/github/go-phorce/configen/badge.svg?branch=master)](https://coveralls.io/github/go-phorce/configen?branch=master)
+
 Tool to generate a configuration system, define your config types, and have everything code generated from it. Supports parameter overrides based on hostname, or from an environment variable.
 Expecting GOPATH location is github.com/go-phorce/configen
 
@@ -57,7 +60,3 @@ Optionally run golang race detector with test targets by setting RACE flag:
 Review coverage report:
 
     make covtest coverage
-
-### Current build status
-
-[![Build Status](https://travis-ci.org/go-phorce/configen.svg?branch=master)](https://travis-ci.org/go-phorce/configen)
