@@ -82,6 +82,7 @@ type fieldInfo struct {
 	GoType *typeInfo
 }
 
+// OverrideImpl pipe returns overrideFrom implementation
 func (f *fieldInfo) OverrideImpl() string {
 	if f.GoType.overrideStyle == osStruct {
 		return fmt.Sprintf("c.%s.overrideFrom(&o.%s)", f.Name, f.Name)
@@ -89,12 +90,44 @@ func (f *fieldInfo) OverrideImpl() string {
 	return fmt.Sprintf("%s(&c.%s, &o.%s)", f.GoType.OverrideFunc, f.Name, f.Name)
 }
 
+// IsStruct returns true for Structure type
+func (f *fieldInfo) IsStruct() bool {
+	return f.GoType.overrideStyle == osStruct
+}
+
 // structInfo is metadata about a collection of fields that are mapped to a single go struct
 type structInfo struct {
 	commentable
-	Fields []fieldInfo
+	WithGetter bool
+	Fields     []fieldInfo
 	// GoType will be created & populated via the config post processing, not from the json [this is exported so the template can access it]
 	GoType *typeInfo
+}
+
+// GettersImpl pipe returns Getters implementation
+func (s *structInfo) GettersImpl() string {
+	list := []string{}
+
+	for _, f := range s.Fields {
+		var fs string
+		if f.GoType.overrideStyle == osStruct {
+			fs = fmt.Sprintf("func (c *%s) Get%sCfg() *%s {\n\treturn &c.%s\n}",
+				s.GoType.Name,
+				f.Name,
+				f.Type,
+				f.Name,
+			)
+		} else {
+			fs = fmt.Sprintf("func (c *%s) Get%s() %s {\n\treturn c.%s\n}",
+				s.GoType.Name,
+				f.Name,
+				f.Type,
+				f.Name,
+			)
+		}
+		list = append(list, fs)
+	}
+	return strings.Join(list, "\n")
 }
 
 // configDef is the data loaded from the configuration defintion json file.
