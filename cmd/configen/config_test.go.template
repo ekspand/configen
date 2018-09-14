@@ -112,6 +112,26 @@ func Test{{$n}}_overrideFrom(t *testing.T) {
       t.Errorf("{{$n}}.overrideFrom should have overriden the field {{$firstField.Name}}. value now %#v, expecting %#v", dest, exp)
     }
 }
+
+{{if $t.WithGetter}}
+func Test{{$n}}_Getters(t *testing.T) {
+    orig := {{index $t.GoType.ExampleValues 0}}
+    {{range $idx, $f := $t.Fields}}
+        {{if $f.IsStruct}}
+            gv{{$idx}} := orig.Get{{$f.Name}}Cfg()
+            if !reflect.DeepEqual(&orig.{{$f.Name}}, gv{{$idx}}) {
+                t.Errorf("{{$n}}.Get{{$f.Name}}Cfg() does not match")
+            }
+        {{else}}
+            gv{{$idx}} := orig.Get{{$f.Name}}()
+            if !reflect.DeepEqual(orig.{{$f.Name}}, gv{{$idx}}) {
+                t.Errorf("{{$n}}.Get{{$f.Name}}Cfg() does not match")
+            }
+        {{end}}
+	{{end}}
+}
+{{end}}
+
 {{end}}
 
 func Test_LoadOverrides(t *testing.T) {

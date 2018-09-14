@@ -2,20 +2,22 @@
     "PackageName" : "testgen",
     "Configuration" : {
         "Comment" : "Configuration contains the user configurable data for a cluster node",
+        "WithGetter" : true,
         "Fields" : [
-            { "name" : "HTTP",          "type" : "HTTPServer", "comment" : "HTTP contains the config for the HTTPS/JSON API Service"},
-            { "name" : "Audit",         "type" : "Logger",            "comment" : "Audit contains configuration for the audit logger" },
-            { "name" : "Etcd",          "type" : "Etcd",              "comment" : "Etcd contains Raft service configuration" },
-            { "name" : "PKI",           "type" : "PKI",               "comment" : "PKI contains Code Signing PKI configuration" },
-            { "name" : "CryptoProv",    "type" : "CryptoProv",        "comment" : "CryptoProv specifies the configuration for crypto providers" },
-            { "name" : "Metrics",       "type" : "Metrics",           "comment" : "Metrics specifies the metrics pipeline configuration" },
-            { "name" : "LogLevels",     "type" : "[]RepoLogLevel",    "comment" : "LogLevels specifies the log levels per package" },
-            { "name" : "Client",        "type" : "HTTPClient",        "comment" : "Server specifies configurations for the client to connect to the server"}
+            { "name" : "HTTP",          "type" : "HTTPServer",     "comment" : "HTTP contains the config for the HTTPS/JSON API Service"},
+            { "name" : "Audit",         "type" : "Logger",         "comment" : "Audit contains configuration for the audit logger" },
+            { "name" : "Etcd",          "type" : "Etcd",           "comment" : "Etcd contains Raft service configuration" },
+            { "name" : "PKI",           "type" : "PKI",            "comment" : "PKI contains Code Signing PKI configuration" },
+            { "name" : "CryptoProv",    "type" : "CryptoProv",     "comment" : "CryptoProv specifies the configuration for crypto providers" },
+            { "name" : "Metrics",       "type" : "Metrics",        "comment" : "Metrics specifies the metrics pipeline configuration" },
+            { "name" : "LogLevels",     "type" : "[]RepoLogLevel", "comment" : "LogLevels specifies the log levels per package" },
+            { "name" : "Client",        "type" : "HTTPClient",     "comment" : "Server specifies configurations for the client to connect to the server"}
         ]
     },
     "RelatedTypes" : {
         "Authz" : {
-            "comment" : "Authz contains configuration for the authorization module",
+            "Comment" : "Authz contains configuration for the authorization module",
+            "WithGetter" : true,
             "Fields" : [
                 { "name" : "Allow",        "type": "[]string", "comment": "Allow will allow the specified roles access to this path and its children, in format: ${path}:${role},${role}"},
                 { "name" : "AllowAny",     "type": "[]string", "comment": "AllowAny will allow any authenticated request access to this path and its children"},
@@ -23,7 +25,7 @@
             ]
         },
         "RepoLogLevel" : {
-            "comment" : "RepoLogLevel contains information about the log level per repo. Use * to set up global level.",
+            "Comment" : "RepoLogLevel contains information about the log level per repo. Use * to set up global level.",
             "Fields" : [
               { "name" : "Repo",    "type" : "string", "comment" : "Repo specifies the repo name, or '*' for all repos [Global]" },
               { "name" : "Package", "type" : "string", "comment" : "Package specifies the package name" },
@@ -31,7 +33,7 @@
             ]
         },
         "Logger" : {
-            "comment" : "Logger contains information about the configuration of a logger/log rotation",
+            "Comment" : "Logger contains information about the configuration of a logger/log rotation",
             "Fields" : [
               { "name" : "Directory", "type" : "string", "comment" : "Directory contains where to store the log files" },
               { "name" : "MaxAgeDays","type" : "int",    "comment" : "MaxAgeDays controls how old files are before deletion" },
@@ -62,6 +64,7 @@
         },
         "TLSInfo" : {
             "Comment" : "TLSInfo contains configuration info for the TLS",
+            "WithGetter" : true,
             "Fields" : [
                 { "name" : "CertFile",       "type" : "string",   "comment" : "Location of the cert" },
                 { "name" : "KeyFile",        "type" : "string",   "comment" : "Location of the key" },
@@ -106,6 +109,7 @@
         },
         "HTTPServer" : {
             "Comment" : "HTTPServer contains the configuration of the HTTPS API Service",
+            "WithGetter" : true,
             "Fields" : [
               { "name" : "ServiceName",    "type" : "string",  "comment" : "ServiceName specifies name of the service: HTTP|HTTPS|WebAPI" },
               { "name" : "Disabled",       "type" : "*bool",   "comment" : "Disabled specifies if the service is disabled" },
@@ -122,6 +126,7 @@
         },
         "HTTPClient" : {
             "Comment" : "HTTPClient specifies configurations for the client to connect to the server",
+            "WithGetter" : true,
             "Fields" : [
                 { "name" : "Servers",   "type" : "[]string", "comment" : "Servers decribes the list of the server URLs to contact"},
                 { "name" : "ClientTLS", "type" : "TLSInfo",  "comment" : "ClientTLS describes the TLS certs used to connect to the server"}

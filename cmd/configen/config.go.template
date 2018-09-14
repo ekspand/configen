@@ -70,8 +70,10 @@ func (d Duration) TimeDuration() time.Duration {
 
 	func (c *{{$n}}) overrideFrom(o *{{$n}}) {
 		{{range $f := .Fields}}{{$f.OverrideImpl}}
-	{{end}}
+	    {{end}}
 	}
+
+    {{if $t.WithGetter}}{{$t.GettersImpl}}{{end}}
 {{end}}
 
 {{range $t := .BaseTypes}}
