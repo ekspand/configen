@@ -108,6 +108,20 @@ type structInfo struct {
 func (s *structInfo) GettersImpl() string {
 	list := []string{}
 
+	list = append(list, s.PrefixedComment())
+	list = append(list, fmt.Sprintf("type %sConfig interface {", s.GoType.Name))
+	for _, f := range s.Fields {
+		var ft string
+		if f.GoType.overrideStyle == osStruct {
+			ft = fmt.Sprintf("Get%sCfg() *%s", f.Name, f.Type)
+		} else {
+			ft = fmt.Sprintf("Get%s() %s", f.Name, f.Type)
+		}
+		list = append(list, f.PrefixedComment())
+		list = append(list, ft)
+	}
+	list = append(list, "}")
+
 	for _, f := range s.Fields {
 		var fs string
 		if f.GoType.overrideStyle == osStruct {
