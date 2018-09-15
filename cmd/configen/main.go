@@ -108,37 +108,44 @@ type structInfo struct {
 func (s *structInfo) GettersImpl() string {
 	list := []string{}
 
-	list = append(list, s.PrefixedComment())
-	list = append(list, fmt.Sprintf("type %sConfig interface {", s.GoType.Name))
+	intName := s.GoType.Name + "Config"
+	list = append(list, strings.Replace(s.PrefixedComment(), s.GoType.Name, intName, -1))
+	list = append(list, fmt.Sprintf("type %s interface {", intName))
 	for _, f := range s.Fields {
 		var ft string
+		mn := "Get" + f.Name
 		if f.GoType.overrideStyle == osStruct {
-			ft = fmt.Sprintf("Get%sCfg() *%s", f.Name, f.Type)
+			mn += "Cfg"
+			ft = fmt.Sprintf("%s() *%s", mn, f.Type)
 		} else {
-			ft = fmt.Sprintf("Get%s() %s", f.Name, f.Type)
+			ft = fmt.Sprintf("%s() %s", mn, f.Type)
 		}
-		list = append(list, f.PrefixedComment())
+		list = append(list, strings.Replace(f.PrefixedComment(), f.Name, mn, -1))
 		list = append(list, ft)
 	}
 	list = append(list, "}")
 
 	for _, f := range s.Fields {
 		var fs string
+		mn := "Get" + f.Name
 		if f.GoType.overrideStyle == osStruct {
-			fs = fmt.Sprintf("func (c *%s) Get%sCfg() *%s {\n\treturn &c.%s\n}",
+			mn += "Cfg"
+			fs = fmt.Sprintf("func (c *%s) %s() *%s {\n\treturn &c.%s\n}",
 				s.GoType.Name,
-				f.Name,
+				mn,
 				f.Type,
 				f.Name,
 			)
+			strings.Replace(f.PrefixedComment(), s.GoType.Name, intName, -1)
 		} else {
-			fs = fmt.Sprintf("func (c *%s) Get%s() %s {\n\treturn c.%s\n}",
+			fs = fmt.Sprintf("func (c *%s) %s() %s {\n\treturn c.%s\n}",
 				s.GoType.Name,
-				f.Name,
+				mn,
 				f.Type,
 				f.Name,
 			)
 		}
+		list = append(list, strings.Replace(f.PrefixedComment(), f.Name, mn, -1))
 		list = append(list, fs)
 	}
 	return strings.Join(list, "\n")
