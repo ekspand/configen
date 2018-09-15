@@ -1,6 +1,7 @@
 {
   "PackageName" : "moretypes",
   "Configuration" : {
+    "Comment" : "Configuration contains the configuration",
     "Fields" : [
       { "name" : "Bind",        "type" : "string",  "comment" : "Bind Address for raft service" }
     ]
@@ -9,8 +10,8 @@
     "Credentials" : {
       "Comment" : "Credentials define a way to configure credentials to access someother system",
       "Fields" : [
-        { "name" : "Username", "type" : "string", "comment" : "GUS  Username" },
-        { "name" : "Password", "type" : "string", "comment" : "GUS  Password" }
+        { "name" : "Username", "type" : "string", "comment" : "Username comment" },
+        { "name" : "Password", "type" : "string", "comment" : "Password comment" }
       ]
     }
   }

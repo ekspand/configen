@@ -120,7 +120,7 @@ func (s *structInfo) GettersImpl() string {
 		} else {
 			ft = fmt.Sprintf("%s() %s", mn, f.Type)
 		}
-		list = append(list, strings.Replace(f.PrefixedComment(), f.Name, mn, -1))
+		list = append(list, strings.Replace(f.PrefixedComment(), f.GoType.Name, mn, -1))
 		list = append(list, ft)
 	}
 	list = append(list, "}")
@@ -136,7 +136,7 @@ func (s *structInfo) GettersImpl() string {
 				f.Type,
 				f.Name,
 			)
-			strings.Replace(f.PrefixedComment(), s.GoType.Name, intName, -1)
+			strings.Replace(f.PrefixedComment(), f.Name, mn, -1)
 		} else {
 			fs = fmt.Sprintf("func (c *%s) %s() %s {\n\treturn c.%s\n}",
 				s.GoType.Name,

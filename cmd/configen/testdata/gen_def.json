@@ -11,7 +11,7 @@
             { "name" : "CryptoProv",    "type" : "CryptoProv",     "comment" : "CryptoProv specifies the configuration for crypto providers" },
             { "name" : "Metrics",       "type" : "Metrics",        "comment" : "Metrics specifies the metrics pipeline configuration" },
             { "name" : "LogLevels",     "type" : "[]RepoLogLevel", "comment" : "LogLevels specifies the log levels per package" },
-            { "name" : "Client",        "type" : "HTTPClient",     "comment" : "Server specifies configurations for the client to connect to the server"}
+            { "name" : "Client",        "type" : "HTTPClient",     "comment" : "Client specifies configurations for the client to connect to the server"}
         ]
     },
     "RelatedTypes" : {
@@ -66,10 +66,10 @@
             "Comment" : "TLSInfo contains configuration info for the TLS",
             "WithGetter" : true,
             "Fields" : [
-                { "name" : "CertFile",       "type" : "string",   "comment" : "Location of the cert" },
-                { "name" : "KeyFile",        "type" : "string",   "comment" : "Location of the key" },
-                { "name" : "TrustedCAFile",  "type" : "string",   "comment" : "Location of the CA file" },
-                { "name" : "ClientCertAuth", "type" : "*bool",    "comment" : "Controls client auth" }
+                { "name" : "CertFile",       "type" : "string",   "comment" : "CertFile specifies location of the cert" },
+                { "name" : "KeyFile",        "type" : "string",   "comment" : "KeyFile specifies location of the key" },
+                { "name" : "TrustedCAFile",  "type" : "string",   "comment" : "TrustedCAFile specifies location of the CA file" },
+                { "name" : "ClientCertAuth", "type" : "*bool",    "comment" : "ClientCertAuth controls client auth" }
             ]
         },
         "Etcd" : {
@@ -115,7 +115,7 @@
               { "name" : "Disabled",       "type" : "*bool",   "comment" : "Disabled specifies if the service is disabled" },
               { "name" : "VIPName",        "type" : "string",  "comment" : "VIPName is the FQ name of the VIP to the cluster [this is used when building the cert requests]" },
               { "name" : "BindAddr",       "type" : "string",  "comment" : "BindAddr is the address that the HTTPS service should be exposed on"},
-              { "name" : "ServerTLS",      "type" : "TLSInfo", "comment" : "TLS config for server"},
+              { "name" : "ServerTLS",      "type" : "TLSInfo", "comment" : "ServerTLS specifies TLS config for server"},
               { "name" : "PackageLogger",  "type" : "string",  "comment" : "PackageLogger if set, specifies name of the package logger" },
               { "name" : "AllowProfiling", "type" : "*bool",   "comment" : "AllowProfiling if set, will allow for per request CPU/Memory profiling triggered by the URI QueryString" },
               { "name" : "ProfilerDir",    "type" : "string",  "comment" : "ProfilerDir specifies the directories where per-request profile information is written, if not set will write to a TMP dir" },
