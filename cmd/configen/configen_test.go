@@ -149,6 +149,9 @@ func genCompileTest(t *testing.T, tc os.FileInfo) {
 	require.NoError(t, err)
 
 	goBuild(t, pkgName, destDir)
+	goFmt(t, pkgName, destDir)
+	goVet(t, pkgName, destDir)
+	goLint(t, pkgName, destDir)
 	goTest(t, pkgName, destDir)
 }
 
@@ -158,7 +161,7 @@ func goBuild(t *testing.T, testName, dir string) {
 	res, err := b.CombinedOutput()
 	sr := string(res)
 	t.Logf("go build output: %s", sr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, strings.Contains(sr, testName))
 }
 
@@ -166,11 +169,47 @@ func goTest(t *testing.T, testName, dir string) {
 	b := exec.Command("go", "test", ".")
 	b.Dir = dir
 	res, err := b.CombinedOutput()
-	require.NoError(t, err)
 
 	sr := string(res)
 	t.Logf("go test output: %s", sr)
+
+	require.NoError(t, err)
 	assert.True(t, strings.HasPrefix(sr, "ok "))
+}
+
+func goFmt(t *testing.T, testName, dir string) {
+	b := exec.Command("gofmt", "-l", "-s", "-w", ".")
+	b.Dir = dir
+	res, err := b.CombinedOutput()
+
+	sr := string(res)
+	t.Logf("gofmt output: %s", sr)
+
+	require.NoError(t, err)
+}
+
+func goVet(t *testing.T, testName, dir string) {
+	b := exec.Command("go", "vet", "./...")
+	b.Dir = dir
+	res, err := b.CombinedOutput()
+
+	sr := string(res)
+	t.Logf("go vet output: %s", sr)
+
+	require.NoError(t, err)
+}
+
+func goLint(t *testing.T, testName, dir string) {
+	b := exec.Command("golint", "-set_exit_status", "./...")
+	b.Dir = dir
+	res, err := b.CombinedOutput()
+
+	sr := string(res)
+	t.Logf("golint output: %s", sr)
+
+	require.NoError(t, err)
+
+	assert.False(t, strings.Contains(sr, "Found"))
 }
 
 // returns all files in the package directory that match the gen*.json pattern
