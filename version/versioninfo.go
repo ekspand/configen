@@ -20,7 +20,7 @@ type Info struct {
 // 	GIT_VERSION := $(shell git describe --dirty --always --tags --long)
 // and then using gofmt to substitute it into a template
 func (v *Info) PopulateFromBuild() {
-	fmt.Sscanf(v.Build, "v%d.%d-%d", &v.Major, &v.Minor, &v.Commit)
+	fmt.Sscanf(v.Build, "v%d.%d.%d", &v.Major, &v.Minor, &v.Commit)
 	fmt.Sscanf(v.Build, "v%f-", &v.flt)
 	v.flt = v.flt*1000000 + float32(v.Commit)
 }

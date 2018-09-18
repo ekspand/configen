@@ -6,7 +6,7 @@ var currentVersion = Info{
 	Major:  0,
 	Minor:  0,
 	Commit: 0,
-	Build:  "v0.3-41",
+	Build:  "v0.3.43",
 }
 
 func init() {
