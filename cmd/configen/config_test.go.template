@@ -6,9 +6,11 @@ import (
   "encoding/json"
   "io/ioutil"
   "os"
-  "reflect"
   "testing"
   "time"
+
+  //"github.com/stretchr/testify/assert"
+  "github.com/stretchr/testify/require"
 )
 
 var (
@@ -78,14 +80,10 @@ func Test_{{$t.OverrideFunc}}(t *testing.T) {
     d := {{index $t.ExampleValues 0}}
     var zero {{$t.Name}}
 	{{ $t.OverrideFunc }}(&d, &zero)
-    if reflect.DeepEqual(d, zero) {
-      t.Errorf("{{$t.OverrideFunc}} shouldn't have overriden the value as the override is the default/zero value. value now %v", d)
-    }
+    require.NotEqual(t, d, zero, "{{$t.OverrideFunc}} shouldn't have overriden the value as the override is the default/zero value. value now %v", d)
     o := {{index $t.ExampleValues 1}}
     {{ $t.OverrideFunc }}(&d, &o)
-    if !reflect.DeepEqual(d, o) {
-      t.Errorf("{{$t.OverrideFunc}} should of overriden the value but didn't. value %v, expecting %v", d, o)
-    }
+    require.Equal(t, d, o, "{{$t.OverrideFunc}} should of overriden the value but didn't. value %v, expecting %v", d, o)
 }
 {{end}}
 
@@ -95,22 +93,16 @@ func Test{{$n}}_overrideFrom(t *testing.T) {
     dest := orig
     var zero {{$n}}
 	dest.overrideFrom(&zero)
-    if !reflect.DeepEqual(dest, orig) {
-      t.Errorf("{{$n}}.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
-    }
+    require.Equal(t, dest, orig, "{{$n}}.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
     o := {{index $t.GoType.ExampleValues 1}}
 	dest.overrideFrom(&o)
-    if !reflect.DeepEqual(dest, o) {
-      t.Errorf("{{$n}}.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
-    }
+    require.Equal(t, dest, o, "{{$n}}.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
     o2 := {{index $t.GoType.ExampleValues 3}}
 	dest.overrideFrom(&o2)
     exp := o
     {{$firstField := index $t.Fields 0}}
     exp.{{$firstField.Name}} = o2.{{$firstField.Name}}
-    if !reflect.DeepEqual(dest, exp) {
-      t.Errorf("{{$n}}.overrideFrom should have overriden the field {{$firstField.Name}}. value now %#v, expecting %#v", dest, exp)
-    }
+    require.Equal(t, dest, exp, "{{$n}}.overrideFrom should have overriden the field {{$firstField.Name}}. value now %#v, expecting %#v", dest, exp)
 }
 
 {{if $t.WithGetter}}
@@ -119,14 +111,10 @@ func Test{{$n}}_Getters(t *testing.T) {
     {{range $idx, $f := $t.Fields}}
         {{if $f.IsStruct}}
             gv{{$idx}} := orig.Get{{$f.Name}}Cfg()
-            if !reflect.DeepEqual(&orig.{{$f.Name}}, gv{{$idx}}) {
-                t.Errorf("{{$n}}.Get{{$f.Name}}Cfg() does not match")
-            }
+            require.Equal(t, orig.{{$f.Name}}, *gv{{$idx}}, "{{$n}}.Get{{$f.Name}}Cfg() does not match")
         {{else}}
             gv{{$idx}} := orig.Get{{$f.Name}}()
-            if !reflect.DeepEqual(orig.{{$f.Name}}, gv{{$idx}}) {
-                t.Errorf("{{$n}}.Get{{$f.Name}}Cfg() does not match")
-            }
+            require.Equal(t, orig.{{$f.Name}}, gv{{$idx}}, "{{$n}}.Get{{$f.Name}}Cfg() does not match")
         {{end}}
 	{{end}}
 }
@@ -154,16 +142,12 @@ func Test_LoadOverrides(t *testing.T) {
   if err != nil {
     t.Fatalf("Unexpected error loading config: %v", err)
   }
-  if !reflect.DeepEqual(&c.Defaults, config) {
-    t.Errorf("Loaded configuration should match default, but doesn't, expecting %#v, got %#v", c.Defaults, *config)
-  }
+  require.Equal(t, c.Defaults, *config, "Loaded configuration should match default, but doesn't, expecting %#v, got %#v", c.Defaults, *config)
   config, err = Load(f.Name(), "", "bob")
   if err != nil {
     t.Fatalf("Unexpected error loading config: %v", err)
   }
-  if !reflect.DeepEqual(c.Overrides["example2"], *config) {
-    t.Errorf("Loaded configuration should match default, but doesn't, expecting %#v, got %#v", c.Overrides["example2"], *config)
-  }
+  require.Equal(t, c.Overrides["example2"], *config, "Loaded configuration should match default, but doesn't, expecting %#v, got %#v", c.Overrides["example2"], *config)
   _, err = Load(f.Name(), "", "bob2")
   if err == nil || err.Error() != "Configuration for host bob2 specified override set missing but that doesn't exist" {
     t.Errorf("Should of gotten error about missing override set, but got %v", err)
