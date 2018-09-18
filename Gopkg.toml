@@ -24,6 +24,7 @@
 #   go-tests = true
 #   unused-packages = true
 
+required = ["github.com/stretchr/testify"]
 
 [[constraint]]
   branch = "master"

@@ -21,6 +21,9 @@ SHELL=/bin/bash
 #	PROJ_GOFILES
 #		List of all .go files in the project, exluding vendor and tools
 #
+#	REL_PATH_TO_GOPATH
+#		Relative path from repo to GOPATH
+#
 # Test flags:
 #
 #	TEST_RACEFLAG
@@ -34,7 +37,7 @@ SHELL=/bin/bash
 #	show_dep_updates {folder}
 #		Show dependencies updates in {folder}
 #
-#	gitclone {org} {repo} {destination_dir}
+#	httpsclone {org} {repo} {destination_dir}
 #
 #	go_test_cover
 #
@@ -44,10 +47,11 @@ SHELL=/bin/bash
 PROJ_ROOT := $(shell pwd)
 
 ## Project variables
-ORG_NAME=$(shell .project/config_var.sh project_org)
-PROJ_NAME=$(shell .project/config_var.sh project_name)
-REPO_NAME=${ORG_NAME}/${PROJ_NAME}
+ORG_NAME := $(shell .project/config_var.sh project_org)
+PROJ_NAME := $(shell .project/config_var.sh project_name)
+REPO_NAME := ${ORG_NAME}/${PROJ_NAME}
 PROJ_PACKAGE := ${REPO_NAME}
+REL_PATH_TO_GOPATH := $(shell .project/rel_gopath.sh)
 
 ## Common variables
 HOSTNAME := $(shell echo $$HOSTNAME)
@@ -127,14 +131,26 @@ define show_dep_updates
 	find $(1) -name .git -exec sh -c 'cd {}/.. && [ $$(git log --oneline HEAD...origin/master | wc -l) -gt 0 ] && echo "\n" && pwd && git --no-pager log --pretty=oneline --abbrev=0 --graph HEAD...origin/master' \;
 endef
 
+# httpsclone is a function that will do a clone, or a fetch / checkout [if we'd previous done a clone]
+# usage, $(call httpsclone,github.com,ekspand/foo,/some/directory,some_sha)
+# it builds a repo url from the first 2 params, the 3rd param is the directory to place the repo
+# and the final param is the commit to checkout [a sha or branch or tag]
+define httpsclone
+	@echo "Checking/Updating dependency https://$(1)/$(2)"
+	@if [ -d $(3) ]; then cd $(3) && git fetch origin; fi			# update from remote if we've already cloned it
+	@if [ ! -d $(3) ]; then git clone -q -n https://$(1)/$(2) $(3); fi  # clone a new copy
+	@cd $(3) && git checkout -q $(4)								# checkout out specific commit
+	@sleep ${CLONE_DELAY}
+endef
+
 # gitclone is a function that will do a clone, or a fetch / checkout [if we'd previous done a clone]
 # usage, $(call gitclone,github.com,ekspand/foo,/some/directory,some_sha)
 # it builds a repo url from the first 2 params, the 3rd param is the directory to place the repo
 # and the final param is the commit to checkout [a sha or branch or tag]
 define gitclone
-	@echo "Checking/Updating dependency https://$(1)/$(2)"
+	@echo "Checking/Updating dependency git@$(1):$(2).git"
 	@if [ -d $(3) ]; then cd $(3) && git fetch origin; fi			# update from remote if we've already cloned it
-	@if [ ! -d $(3) ]; then git clone -q -n https://$(1)/$(2) $(3); fi  # clone a new copy
+	@if [ ! -d $(3) ]; then git clone -q -n git@$(1):$(2).git $(3); fi  # clone a new copy
 	@cd $(3) && git checkout -q $(4)								# checkout out specific commit
 	@sleep ${CLONE_DELAY}
 endef
@@ -204,15 +220,17 @@ list:
 vars:
 	[ -d "${PROJ_REPO_TARGET}" ] && echo "Repo target exists: ${PROJ_REPO_TARGET}" || echo "Symbolic link does not exist: ${PROJ_REPO_TARGET}"
 	echo "PROJ_DIR=$(PROJ_DIR)"
+	echo "PROJ_REPO_TARGET=$(PROJ_REPO_TARGET)"
 	echo "GOROOT=$(GOROOT)"
 	echo "GOPATH=$(GOPATH)"
+	echo "PROJ_REPO_TARGET=$(PROJ_REPO_TARGET)"
 	echo "PROJ_PACKAGE=$(PROJ_PACKAGE)"
 	echo "PROJ_GOPATH=$(PROJ_GOPATH)"
 	echo "TOOLS_PATH=$(TOOLS_PATH)"
 	echo "TEST_GOPATH=$(TEST_GOPATH)"
 	echo "TEST_DIR=$(TEST_DIR)"
 	echo "GIT_VERSION=$(GIT_VERSION)"
-
+	go version
 #
 # clean produced files
 #
@@ -238,9 +256,9 @@ gopath:
 	@[ ! -d $(PROJ_REPO_TARGET) ] && \
 		rm -f "${PROJ_REPO_TARGET}" && \
 		mkdir -p "${PROJ_GOPATH_DIR}/src/${ORG_NAME}" && \
-		ln -s ../../../.. "${PROJ_REPO_TARGET}" && \
-		echo "Created symbolic link: ${PROJ_REPO_TARGET}" || \
-	echo "Repo target exists: ${PROJ_REPO_TARGET}"
+		ln -s ${REL_PATH_TO_GOPATH} "${PROJ_REPO_TARGET}" && \
+		echo "Created symbolic link: ${PROJ_REPO_TARGET} => ${REL_PATH_TO_GOPATH}" || \
+	echo "Repo target exists: ${PROJ_REPO_TARGET} => ${REL_PATH_TO_GOPATH}"
 
 #
 # show updates in Tools and vendor folder.
@@ -295,6 +313,10 @@ test: fmt vet lint
 testshort:
 	echo "Running testshort"
 	cd ${TEST_DIR} && go test ${TEST_RACEFLAG} ./... --test.short
+
+# you can run a subset of tests with make sometests testname=<testnameRegex>
+sometests:
+	cd ${TEST_DIR} && go test ${TEST_RACEFLAG} ./... --test.short -run $(testname)
 
 covtest: fmt vet lint
 	echo "Running covtest"
@@ -352,30 +374,34 @@ help:
 	echo "make devtools - install dev tools"
 
 getdevtools:
-	$(call gitclone,${GITHUB_HOST},golang/tools,           ${GOPATH}/src/golang.org/x/tools,                  release-branch.go1.10)
-	$(call gitclone,${GITHUB_HOST},derekparker/delve,      ${GOPATH}/src/github.com/derekparker/delve,        master)
-	$(call gitclone,${GITHUB_HOST},uudashr/gopkgs,         ${GOPATH}/src/github.com/uudashr/gopkgs,           master)
-	$(call gitclone,${GITHUB_HOST},nsf/gocode,             ${GOPATH}/src/github.com/nsf/gocode,               master)
-	$(call gitclone,${GITHUB_HOST},rogpeppe/godef,         ${GOPATH}/src/github.com/rogpeppe/godef,           master)
-	$(call gitclone,${GITHUB_HOST},acroca/go-symbols,      ${GOPATH}/src/github.com/acroca/go-symbols,        master)
-	$(call gitclone,${GITHUB_HOST},ramya-rao-a/go-outline, ${GOPATH}/src/github.com/ramya-rao-a/go-outline,   master)
-	$(call gitclone,${GITHUB_HOST},ddollar/foreman,        ${GOPATH}/src/github.com/ddollar/foreman,          master)
-	$(call gitclone,${GITHUB_HOST},sqs/goreturns,          ${GOPATH}/src/github.com/sqs/goreturns,            master)
-	$(call gitclone,${GITHUB_HOST},karrick/godirwalk,      ${GOPATH}/src/github.com/karrick/godirwalk,        master)
-	$(call gitclone,${GITHUB_HOST},pkg/errors,             ${GOPATH}/src/github.com/pkg/errors,               master)
+	$(call httpsclone,${GITHUB_HOST},golang/tools,           ${TOOLS_PATH}/src/golang.org/x/tools,                  release-branch.go1.11)
+	$(call httpsclone,${GITHUB_HOST},golang/dep,             ${TOOLS_PATH}/src/github.com/golang/dep,               master)
+	$(call httpsclone,${GITHUB_HOST},derekparker/delve,      ${TOOLS_PATH}/src/github.com/derekparker/delve,        master)
+	$(call httpsclone,${GITHUB_HOST},uudashr/gopkgs,         ${TOOLS_PATH}/src/github.com/uudashr/gopkgs,           master)
+	$(call httpsclone,${GITHUB_HOST},nsf/gocode,             ${TOOLS_PATH}/src/github.com/nsf/gocode,               master)
+	$(call httpsclone,${GITHUB_HOST},rogpeppe/godef,         ${TOOLS_PATH}/src/github.com/rogpeppe/godef,           master)
+	$(call httpsclone,${GITHUB_HOST},acroca/go-symbols,      ${TOOLS_PATH}/src/github.com/acroca/go-symbols,        master)
+	$(call httpsclone,${GITHUB_HOST},ramya-rao-a/go-outline, ${TOOLS_PATH}/src/github.com/ramya-rao-a/go-outline,   master)
+	$(call httpsclone,${GITHUB_HOST},ddollar/foreman,        ${TOOLS_PATH}/src/github.com/ddollar/foreman,          master)
+	$(call httpsclone,${GITHUB_HOST},sqs/goreturns,          ${TOOLS_PATH}/src/github.com/sqs/goreturns,            master)
+	$(call httpsclone,${GITHUB_HOST},karrick/godirwalk,      ${TOOLS_PATH}/src/github.com/karrick/godirwalk,        master)
+	$(call httpsclone,${GITHUB_HOST},pkg/errors,             ${TOOLS_PATH}/src/github.com/pkg/errors,               master)
 
 devtools: getdevtools
-	go install golang.org/x/tools/go/buildutil
-	go install golang.org/x/tools/cmd/fiximports
-	go install golang.org/x/tools/cmd/goimports
-	go install github.com/derekparker/delve/cmd/dlv
-	go install github.com/uudashr/gopkgs/cmd/gopkgs
-	go install github.com/nsf/gocode
-	go install github.com/rogpeppe/godef
-	go install github.com/acroca/go-symbols
-	go install github.com/ramya-rao-a/go-outline
-	go install github.com/sqs/goreturns
+	GOPATH=${TOOLS_PATH} go install golang.org/x/tools/go/buildutil
+	GOPATH=${TOOLS_PATH} go install golang.org/x/tools/cmd/fiximports
+	GOPATH=${TOOLS_PATH} go install golang.org/x/tools/cmd/goimports
+	GOPATH=${TOOLS_PATH} go install github.com/golang/dep/cmd/dep
+	GOPATH=${TOOLS_PATH} go install github.com/derekparker/delve/cmd/dlv
+	GOPATH=${TOOLS_PATH} go install github.com/uudashr/gopkgs/cmd/gopkgs
+	GOPATH=${TOOLS_PATH} go install github.com/nsf/gocode
+	GOPATH=${TOOLS_PATH} go install github.com/rogpeppe/godef
+	GOPATH=${TOOLS_PATH} go install github.com/acroca/go-symbols
+	GOPATH=${TOOLS_PATH} go install github.com/ramya-rao-a/go-outline
+	GOPATH=${TOOLS_PATH} go install github.com/sqs/goreturns
 
 upgrade-project.mk:
 	wget -O vscode.sh https://raw.githubusercontent.com/go-phorce/go-makefile/master/vscode.sh
 	wget -O .project/go-project.mk https://raw.githubusercontent.com/go-phorce/go-makefile/master/.project/go-project.mk
+	wget -O .project/rel_gopath.sh https://raw.githubusercontent.com/go-phorce/go-makefile/master/.project/rel_gopath.sh
+	wget -O .project/config-softhsm.sh https://raw.githubusercontent.com/go-phorce/go-makefile/master/.project/config-softhsm.sh
