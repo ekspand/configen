@@ -231,6 +231,7 @@ vars:
 	echo "TEST_DIR=$(TEST_DIR)"
 	echo "GIT_VERSION=$(GIT_VERSION)"
 	go version
+
 #
 # clean produced files
 #
