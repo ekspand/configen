@@ -112,6 +112,9 @@ func Test{{$n}}_Getters(t *testing.T) {
         {{if $f.IsStruct}}
             gv{{$idx}} := orig.Get{{$f.Name}}Cfg()
             require.Equal(t, orig.{{$f.Name}}, *gv{{$idx}}, "{{$n}}.Get{{$f.Name}}Cfg() does not match")
+        {{else if $f.IsBoolPtr}}
+            gv{{$idx}} := orig.Get{{$f.Name}}()
+            require.Equal(t, orig.{{$f.Name}}, &gv{{$idx}}, "{{$n}}.Get{{$f.Name}}() does not match")
         {{else}}
             gv{{$idx}} := orig.Get{{$f.Name}}()
             require.Equal(t, orig.{{$f.Name}}, gv{{$idx}}, "{{$n}}.Get{{$f.Name}}Cfg() does not match")
