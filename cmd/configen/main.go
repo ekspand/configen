@@ -95,6 +95,11 @@ func (f *fieldInfo) IsStruct() bool {
 	return f.GoType.overrideStyle == osStruct
 }
 
+// IsBoolPtr returns true for *bool type
+func (f *fieldInfo) IsBoolPtr() bool {
+	return f.GoType.overrideStyle == osCompareNil && f.Type == "*bool"
+}
+
 // structInfo is metadata about a collection of fields that are mapped to a single go struct
 type structInfo struct {
 	commentable
@@ -117,6 +122,9 @@ func (s *structInfo) GettersImpl() string {
 		if f.GoType.overrideStyle == osStruct {
 			mn += "Cfg"
 			ft = fmt.Sprintf("%s() *%s", mn, f.Type)
+		} else if f.GoType.overrideStyle == osCompareNil && f.Type == "*bool" {
+			mn += "Cfg"
+			ft = fmt.Sprintf("%s() bool", mn)
 		} else {
 			ft = fmt.Sprintf("%s() %s", mn, f.Type)
 		}
@@ -137,6 +145,13 @@ func (s *structInfo) GettersImpl() string {
 				f.Name,
 			)
 			strings.Replace(f.PrefixedComment(), f.Name, mn, -1)
+		} else if f.GoType.overrideStyle == osCompareNil && f.Type == "*bool" {
+			fs = fmt.Sprintf("func (c *%s) %s() bool {\n\treturn c.%s != nil && *c.%s\n}",
+				s.GoType.Name,
+				mn,
+				f.Name,
+				f.Name,
+			)
 		} else {
 			fs = fmt.Sprintf("func (c *%s) %s() %s {\n\treturn c.%s\n}",
 				s.GoType.Name,
