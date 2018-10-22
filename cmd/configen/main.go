@@ -128,10 +128,8 @@ func (s *structInfo) GettersImpl() string {
 			mn += "Cfg"
 			ft = fmt.Sprintf("%s() *%s", mn, f.Type)
 		} else if f.IsBoolPtr() {
-			mn += "Cfg"
 			ft = fmt.Sprintf("%s() bool", mn)
 		} else if f.IsDuration() {
-			mn += "Cfg"
 			ft = fmt.Sprintf("%s() time.Duration", mn)
 		} else {
 			ft = fmt.Sprintf("%s() %s", mn, f.Type)
