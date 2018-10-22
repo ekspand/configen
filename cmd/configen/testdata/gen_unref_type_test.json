@@ -3,7 +3,8 @@
   "Configuration" : {
     "Comment" : "Configuration contains the configuration",
     "Fields" : [
-      { "name" : "Bind",        "type" : "string",  "comment" : "Bind Address for raft service" }
+      { "name" : "Bind",        "type" : "string",   "comment" : "Bind Address for raft service" },
+      { "name" : "Expiry",      "type" : "Duration", "comment" : "Expiry of the binding" }
     ]
   },
   "RelatedTypes" : {

@@ -129,7 +129,8 @@
             "WithGetter" : true,
             "Fields" : [
                 { "name" : "Servers",   "type" : "[]string", "comment" : "Servers decribes the list of the server URLs to contact"},
-                { "name" : "ClientTLS", "type" : "TLSInfo",  "comment" : "ClientTLS describes the TLS certs used to connect to the server"}
+                { "name" : "ClientTLS", "type" : "TLSInfo",  "comment" : "ClientTLS describes the TLS certs used to connect to the server"},
+                { "name" : "Timeout",   "type" : "Duration", "comment" : "Timeout of the connection" }
             ]
         }
     }
