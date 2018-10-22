@@ -115,6 +115,9 @@ func Test{{$n}}_Getters(t *testing.T) {
         {{else if $f.IsBoolPtr}}
             gv{{$idx}} := orig.Get{{$f.Name}}()
             require.Equal(t, orig.{{$f.Name}}, &gv{{$idx}}, "{{$n}}.Get{{$f.Name}}() does not match")
+        {{else if $f.IsDuration}}
+            gv{{$idx}} := orig.Get{{$f.Name}}()
+            require.Equal(t, orig.{{$f.Name}}.TimeDuration(), gv{{$idx}}, "{{$n}}.Get{{$f.Name}}() does not match")
         {{else}}
             gv{{$idx}} := orig.Get{{$f.Name}}()
             require.Equal(t, orig.{{$f.Name}}, gv{{$idx}}, "{{$n}}.Get{{$f.Name}}Cfg() does not match")
