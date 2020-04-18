@@ -1,9 +1,9 @@
 #!/bin/bash
 # this script creates PROJ_GOPATH folder for the project in GOPATH
 
-ROOT=`pwd`
+PROJ_ROOT=`pwd`
 GOROOT=`go env GOROOT`
-echo "Working in $ROOT"
+echo "Working in $PROJ_ROOT"
 
 # include parse_yaml function
 source .project/yaml.sh
@@ -35,7 +35,7 @@ PROJ_PACKAGE=$REPO_NAME
 PROJ_GOPATH=$CWD
 echo "PROJ_GOPATH=$PROJ_GOPATH"
 
-export PROJ_DIR=$ROOT
+export PROJ_DIR=$PROJ_ROOT
 export PROJ_GOPATH_DIR="$PROJ_GOPATH_DIR"
 export PROJ_GOPATH=$PROJ_GOPATH
 export GOPATH=$PROJ_GOPATH
@@ -44,32 +44,22 @@ export PATH=$PATH:$PROJ_GOPATH/bin:$PROJ_DIR/bin:$PROJ_DIR/.tools/bin:$GOROOT/bi
 env | grep GO
 popd
 
-code . & make devtools
+code .
 else
 #
 # Not in GOPATH format
 #
 echo "WARNING: this project is not cloned in GOPATH"
 
-pushd ..
-CWD=`pwd`
-PROJ_GOPATH_DIR=gopath
-PROJ_PACKAGE=$REPO_NAME
-PROJ_GOPATH=$CWD/$PROJ_GOPATH_DIR
-echo "PROJ_GOPATH=$PROJ_GOPATH"
+ORG_NAME=$project_org
+PROJ_NAME=$project_name
+REPO_NAME=$ORG_NAME/$PROJ_NAME
+export GOPATH=/tmp/gopath/$PROJ_NAME
+export PROJ_GOPATH=$GOPATH
+export PATH=$PATH:$PROJ_ROOT/.tools/bin
 
-[ -d "$PROJ_GOPATH_DIR/src/$REPO_NAME" ] && rm -f "$PROJ_GOPATH_DIR/src/$REPO_NAME"
-mkdir -p "$PROJ_GOPATH_DIR/src/$ORG_NAME"
-ln -s $REL_PATH_TO_GOPATH/$PROJ_NAME "$PROJ_GOPATH_DIR/src/$REPO_NAME"
+make gopath
 
-export PROJ_DIR=$ROOT
-export PROJ_GOPATH_DIR="../$PROJ_GOPATH_DIR"
-export PROJ_GOPATH=$PROJ_GOPATH
-export GOPATH=$PROJ_GOPATH
-export GOROOT=$GOROOT
-export PATH=$PATH:$PROJ_GOPATH/bin:$PROJ_DIR/bin:$PROJ_DIR/.tools/bin:$GOROOT/bin
-env | grep GO
-popd
-
-code "$PROJ_GOPATH/src/$REPO_NAME" & make devtools
+echo "Opening in $GOPATH/src/$REPO_NAME"
+code $GOPATH/src/$REPO_NAME
 fi

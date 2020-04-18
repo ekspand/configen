@@ -79,20 +79,18 @@ export VENDOR_SRC=$(PROJ_ROOT)/vendor
 # then GOPATH and GOPROJ_DIR are expected to be set, and symbolic link to the project must be created;
 # otherwise create necessary environment
 ifndef PROJ_GOPATH
-export PROJ_GOPATH_DIR=.gopath
-export PROJ_GOPATH := ${PROJ_DIR}/${PROJ_GOPATH_DIR}
-export GOPATH := ${PROJ_GOPATH}
-export GOPROJ_DIR := $(shell go env GOPROJ_DIR)
-export PATH := ${PATH}:${GOPATH}/bin:${GOPROJ_DIR}/bin
+export PROJ_GOPATH := /tmp/gopath/$(PROJ_NAME)
+export GOPATH := /tmp/gopath/$(PROJ_NAME)
+export PATH := ${PATH}:${GOPATH}/bin
 endif
 
 # tools path
 export TOOLS_PATH := ${PROJ_DIR}/.tools
 export TOOLS_SRC := ${TOOLS_PATH}/src
 export TOOLS_BIN := ${TOOLS_PATH}/bin
-export PATH := ${PATH}:${TOOLS_BIN}
+export PATH := ${PATH}:${PROJ_BIN}:${TOOLS_BIN}
 
-PROJ_REPO_TARGET := "${PROJ_GOPATH_DIR}/src/${REPO_NAME}"
+PROJ_REPO_TARGET := "${PROJ_GOPATH}/src/${REPO_NAME}"
 
 # test path
 TEST_GOPATH := "${PROJ_GOPATH}"
@@ -131,6 +129,12 @@ define show_dep_updates
 	find $(1) -name .git -exec sh -c 'cd {}/.. && [ $$(git log --oneline HEAD...origin/master | wc -l) -gt 0 ] && echo "\n" && pwd && git --no-pager log --pretty=oneline --abbrev=0 --graph HEAD...origin/master' \;
 endef
 
+# add url.insteadOf to fix GHE
+define ssh_insteadOf
+	@echo "git config --global url.ssh://git@$(1).git.insteadOf $(2)"
+	@git config --global url.ssh://git@$(1).git.insteadOf $(2)
+endef
+
 # httpsclone is a function that will do a clone, or a fetch / checkout [if we'd previous done a clone]
 # usage, $(call httpsclone,github.com,ekspand/foo,/some/directory,some_sha)
 # it builds a repo url from the first 2 params, the 3rd param is the directory to place the repo
@@ -152,6 +156,12 @@ define gitclone
 	@if [ -d $(3) ]; then cd $(3) && git fetch origin; fi			# update from remote if we've already cloned it
 	@if [ ! -d $(3) ]; then git clone -q -n git@$(1):$(2).git $(3); fi  # clone a new copy
 	@cd $(3) && git checkout -q $(4)								# checkout out specific commit
+	@sleep ${CLONE_DELAY}
+endef
+
+define gitclonenewonly
+	@echo "Checking dependency git@$(1):$(2).git"
+	@if [ ! -d $(3) ]; then git clone -q -n git@$(1):$(2).git $(3) && cd $(3) && git checkout -q $(4); fi  # clone a new copy
 	@sleep ${CLONE_DELAY}
 endef
 
@@ -223,9 +233,9 @@ vars:
 	echo "PROJ_REPO_TARGET=$(PROJ_REPO_TARGET)"
 	echo "GOROOT=$(GOROOT)"
 	echo "GOPATH=$(GOPATH)"
+	echo "PROJ_GOPATH=$(PROJ_GOPATH)"
 	echo "PROJ_REPO_TARGET=$(PROJ_REPO_TARGET)"
 	echo "PROJ_PACKAGE=$(PROJ_PACKAGE)"
-	echo "PROJ_GOPATH=$(PROJ_GOPATH)"
 	echo "TOOLS_PATH=$(TOOLS_PATH)"
 	echo "TEST_GOPATH=$(TEST_GOPATH)"
 	echo "TEST_DIR=$(TEST_DIR)"
@@ -246,8 +256,7 @@ clean:
 #
 purge: clean
 	rm -rf \
-		${TOOLS_PATH} \
-		${VENDOR_SRC}
+		${TOOLS_PATH}
 
 #
 # create a symbolic link to project's PROJ_GOPATH,
@@ -256,10 +265,10 @@ purge: clean
 gopath:
 	@[ ! -d $(PROJ_REPO_TARGET) ] && \
 		rm -f "${PROJ_REPO_TARGET}" && \
-		mkdir -p "${PROJ_GOPATH_DIR}/src/${ORG_NAME}" && \
-		ln -s ${REL_PATH_TO_GOPATH} "${PROJ_REPO_TARGET}" && \
-		echo "Created symbolic link: ${PROJ_REPO_TARGET} => ${REL_PATH_TO_GOPATH}" || \
-	echo "Repo target exists: ${PROJ_REPO_TARGET} => ${REL_PATH_TO_GOPATH}"
+		mkdir -p "${PROJ_GOPATH}/src/${ORG_NAME}" && \
+		ln -s ${PROJ_DIR} "${PROJ_REPO_TARGET}" && \
+		echo "Created symbolic link: ${PROJ_REPO_TARGET} => ${PROJ_DIR}" || \
+	echo "Repo target exists: ${PROJ_REPO_TARGET} => ${PROJ_DIR}"
 
 #
 # show updates in Tools and vendor folder.
@@ -278,37 +287,37 @@ lspkg:
 # print out GO environment
 #
 env:
-	GOPATH=${GOPATH} go env
+	GOPATH="${GOPATH}" go env
 
 #
 # print out GO test environment
 #
 testenv:
-	GOPATH=${TEST_GOPATH} go env
+	GOPATH="${TEST_GOPATH}" go env
 
 #
 # GO test with bench
 #
 bench:
-	GOPATH=${TEST_GOPATH} go test  ${TEST_RACEFLAG} -bench . ${PROJ_PACKAGE}/...
+	GOPATH="${TEST_GOPATH}" go test  ${TEST_RACEFLAG} -bench . ${PROJ_PACKAGE}/...
 
 generate:
-	PATH=${TOOLS_BIN}:${PATH} go generate ./...
+	PATH="${TOOLS_BIN}:${PATH}" go generate ./...
 
 fmt:
 	echo "Running Fmt"
 	gofmt -s -l -w ${GOFILES_NOVENDOR}
 
 vet: build
-	echo "Running vet"
+	echo "Running vet in ${TEST_DIR}"
 	cd ${TEST_DIR} && go vet ./...
 
 lint:
-	echo "Running lint"
-	cd ${TEST_DIR} && GOPATH=${TEST_GOPATH}  go list ./... | grep -v /vendor/ | xargs -L1 golint -set_exit_status
+	echo "Running lint in ${TEST_DIR}"
+	cd ${TEST_DIR} && GOPATH="${TEST_GOPATH}"  go list ./... | grep -v /vendor/ | xargs -L1 golint -set_exit_status
 
 test: fmt vet lint
-	echo "Running test"
+	echo "Running test in ${TEST_DIR}"
 	cd ${TEST_DIR} && go test ${TEST_RACEFLAG} ./...
 
 testshort:
@@ -326,19 +335,19 @@ covtest: fmt vet lint
 # Runs integration tests as well
 testint: fmt vet lint
 	echo "Running testint"
-	GOPATH=${TEST_GOPATH} go test ${TEST_RACEFLAG} -tags=${INTEGRATION_TAG} ${PROJ_PACKAGE}/...
+	GOPATH="${TEST_GOPATH}" go test ${TEST_RACEFLAG} -tags=${INTEGRATION_TAG} ${PROJ_PACKAGE}/...
 
 # shows the coverages results assuming they were already generated by a call to go_test_cover
 coverage:
 	echo "Running coverage"
-	GOPATH=${TEST_GOPATH} go tool cover -html=${COVPATH}/combined.out
+	GOPATH="${TEST_GOPATH}" go tool cover -html="${COVPATH}/combined.out"
 
 # generates a HTML based code coverage report, and writes it to a file in the results directory
 # assumes you've run go_test_cover (or go_test_cover_junit)
 cicoverage:
 	echo "Running cicoverage"
 	mkdir -p ${COVPATH}/cover
-	GOPATH=${TEST_GOPATH} go tool cover -html=${COVPATH}/combined.out -o ${COVPATH}/cover/coverage.html
+	GOPATH="${TEST_GOPATH}" go tool cover -html="${COVPATH}/combined.out" -o "${COVPATH}/cover/coverage.html"
 
 # as Jenkins runs citestint as well which will run all unit tests + integration tests with code coverage
 # this unitest step can skip coverage reporting which speeds it up massively
@@ -348,7 +357,7 @@ citest: vet lint
 	cov-report -fmt xml -o ${COVPATH}/coverage.xml -ex ${COVERAGE_EXCLUSIONS} -cc ${COVPATH}/combined.out ${COVPATH}/cc*.out
 	cov-report -fmt ds -o ${COVPATH}/summary.xml -ex ${COVERAGE_EXCLUSIONS} ${COVPATH}/cc*.out
 
-coveralls: covtest
+coveralls:
 	echo "Running coveralls"
 	goveralls -v -coverprofile=coverage.out -service=travis-ci -package ./...
 
@@ -372,37 +381,9 @@ help:
 	echo "make covtest - run test with coverage report"
 	echo "make coverage - open coverage report"
 	echo "make coveralls - publish coverage to coveralls"
-	echo "make devtools - install dev tools"
-
-getdevtools:
-	$(call httpsclone,${GITHUB_HOST},golang/tools,           ${TOOLS_PATH}/src/golang.org/x/tools,                  release-branch.go1.11)
-	$(call httpsclone,${GITHUB_HOST},golang/dep,             ${TOOLS_PATH}/src/github.com/golang/dep,               master)
-	$(call httpsclone,${GITHUB_HOST},derekparker/delve,      ${TOOLS_PATH}/src/github.com/derekparker/delve,        master)
-	$(call httpsclone,${GITHUB_HOST},uudashr/gopkgs,         ${TOOLS_PATH}/src/github.com/uudashr/gopkgs,           master)
-	$(call httpsclone,${GITHUB_HOST},nsf/gocode,             ${TOOLS_PATH}/src/github.com/nsf/gocode,               master)
-	$(call httpsclone,${GITHUB_HOST},rogpeppe/godef,         ${TOOLS_PATH}/src/github.com/rogpeppe/godef,           master)
-	$(call httpsclone,${GITHUB_HOST},acroca/go-symbols,      ${TOOLS_PATH}/src/github.com/acroca/go-symbols,        master)
-	$(call httpsclone,${GITHUB_HOST},ramya-rao-a/go-outline, ${TOOLS_PATH}/src/github.com/ramya-rao-a/go-outline,   master)
-	$(call httpsclone,${GITHUB_HOST},ddollar/foreman,        ${TOOLS_PATH}/src/github.com/ddollar/foreman,          master)
-	$(call httpsclone,${GITHUB_HOST},sqs/goreturns,          ${TOOLS_PATH}/src/github.com/sqs/goreturns,            master)
-	$(call httpsclone,${GITHUB_HOST},karrick/godirwalk,      ${TOOLS_PATH}/src/github.com/karrick/godirwalk,        master)
-	$(call httpsclone,${GITHUB_HOST},pkg/errors,             ${TOOLS_PATH}/src/github.com/pkg/errors,               master)
-
-devtools: getdevtools
-	GOPATH=${TOOLS_PATH} go install golang.org/x/tools/go/buildutil
-	GOPATH=${TOOLS_PATH} go install golang.org/x/tools/cmd/fiximports
-	GOPATH=${TOOLS_PATH} go install golang.org/x/tools/cmd/goimports
-	GOPATH=${TOOLS_PATH} go install github.com/golang/dep/cmd/dep
-	GOPATH=${TOOLS_PATH} go install github.com/derekparker/delve/cmd/dlv
-	GOPATH=${TOOLS_PATH} go install github.com/uudashr/gopkgs/cmd/gopkgs
-	GOPATH=${TOOLS_PATH} go install github.com/nsf/gocode
-	GOPATH=${TOOLS_PATH} go install github.com/rogpeppe/godef
-	GOPATH=${TOOLS_PATH} go install github.com/acroca/go-symbols
-	GOPATH=${TOOLS_PATH} go install github.com/ramya-rao-a/go-outline
-	GOPATH=${TOOLS_PATH} go install github.com/sqs/goreturns
 
 upgrade-project.mk:
-	wget -O vscode.sh https://raw.githubusercontent.com/go-phorce/go-makefile/master/vscode.sh
 	wget -O .project/go-project.mk https://raw.githubusercontent.com/go-phorce/go-makefile/master/.project/go-project.mk
 	wget -O .project/rel_gopath.sh https://raw.githubusercontent.com/go-phorce/go-makefile/master/.project/rel_gopath.sh
 	wget -O .project/config-softhsm.sh https://raw.githubusercontent.com/go-phorce/go-makefile/master/.project/config-softhsm.sh
+	wget -O vscode.sh https://raw.githubusercontent.com/go-phorce/go-makefile/master/vscode.sh && chmod +x vscode.sh
