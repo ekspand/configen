@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -102,13 +103,58 @@ func Load(configFilename, envKeyName, hostnameOverride string) (*Configuration, 
 // typically you'd just use Load, but this can be useful if you need to
 // do more intricate examination of the entire set of configurations
 func LoadConfigurations(filename string) (*Configurations, error) {
-	cfr, err := os.Open(filename)
+	configs := new(Configurations)
+	err := loadJSON(filename, configs)
 	if err != nil {
 		return nil, err
 	}
-	defer cfr.Close()
-	configs := new(Configurations)
-	return configs, json.NewDecoder(cfr).Decode(configs)
+	if configs.Overrides == nil {
+		configs.Overrides = map[string]Configuration{}
+	}
+
+	loadedcache := map[string]bool{}
+	for _, override := range configs.Hosts {
+		if strings.HasPrefix(override, "file://") && !loadedcache[override] {
+			// mark as loaded
+			loadedcache[override] = true
+
+			fn, err := resolveOverrideConfigFile(override[7:], filename)
+			if err != nil {
+				return nil, err
+			}
+
+			config := new(Configuration)
+			err = loadJSON(fn, config)
+			if err != nil {
+				return nil, err
+			}
+
+			configs.Overrides[override] = *config
+		}
+	}
+
+	return configs, nil
+}
+
+func loadJSON(filename string, v interface{}) error {
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return json.NewDecoder(f).Decode(v)
+}
+
+func resolveOverrideConfigFile(configFile, baseConfigFile string) (string, error) {
+	if !filepath.IsAbs(configFile) {
+		// if relative file not found, try to resolve it as relative to the base config file
+		if _, err := os.Stat(configFile); os.IsNotExist(err) {
+			baseDir := filepath.Dir(baseConfigFile)
+			configFile = filepath.Join(baseDir, configFile)
+		}
+	}
+
+	return configFile, nil
 }
 
 // Configurations is the entire set of configurations, these consist of
@@ -122,7 +168,8 @@ type Configurations struct {
 	// a map of hostname to named configuration
 	Hosts map[string]string
 
-// a map of named configuration overrides
+	// a map of named configuration overrides,
+	// if starts with file:// prefix, then external file will be loaded
 	Overrides map[string]Configuration
 }
 
