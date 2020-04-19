@@ -7,7 +7,6 @@
             { "name" : "HTTP",          "type" : "HTTPServer",     "comment" : "HTTP contains the config for the HTTPS/JSON API Service"},
             { "name" : "Audit",         "type" : "Logger",         "comment" : "Audit contains configuration for the audit logger" },
             { "name" : "Etcd",          "type" : "Etcd",           "comment" : "Etcd contains Raft service configuration" },
-            { "name" : "PKI",           "type" : "PKI",            "comment" : "PKI contains Code Signing PKI configuration" },
             { "name" : "CryptoProv",    "type" : "CryptoProv",     "comment" : "CryptoProv specifies the configuration for crypto providers" },
             { "name" : "Metrics",       "type" : "Metrics",        "comment" : "Metrics specifies the metrics pipeline configuration" },
             { "name" : "LogLevels",     "type" : "[]RepoLogLevel", "comment" : "LogLevels specifies the log levels per package" },
@@ -38,28 +37,6 @@
               { "name" : "Directory", "type" : "string", "comment" : "Directory contains where to store the log files" },
               { "name" : "MaxAgeDays","type" : "int",    "comment" : "MaxAgeDays controls how old files are before deletion" },
               { "name" : "MaxSizeMb", "type" : "int",    "comment" : "MaxSizeMb contols how large a single log file can be before its rotated" }
-            ]
-        },
-        "PrivateCert" : {
-            "Comment" : "PrivateCert contains configuration info for the signing certificate",
-            "Fields" : [
-                { "name" : "ID",             "type" : "string", "comment" : "ID specifies the identifier of the certificate to reference" },
-                { "name" : "CertFile",       "type" : "string", "comment" : "CertFile specifies location of the cert" },
-                { "name" : "KeyFile",        "type" : "string", "comment" : "KeyFile specifies location of the key" },
-                { "name" : "CABundleFile",   "type" : "string", "comment" : "CABundleFile specifies location of the CA bundle file" },
-                { "name" : "RootBundleFile", "type" : "string", "comment" : "RootBundleFile specifies location of the Trusted Root CA file" }
-            ]
-        },
-        "PKI" : {
-            "Comment" : "PKI contains configuration info for code signing PKI",
-            "Fields" : [
-                { "name" : "CAConfig",       "type" : "string",      "comment" : "CAConfig specifies file location with CA profiles" },
-                { "name" : "CsrTemplates",   "type" : "string",      "comment" : "CsrTemplates specifies file location with CSR templates" },
-                { "name" : "CRLNextUpdate",  "type" : "string",      "comment" : "CRLNextUpdate specifies value in 72h00m00s format for duration of CRL next update time" },
-                { "name" : "CRLRenewal",     "type" : "string",      "comment" : "CRLRenewal specifies value in 8h00m00s format for duration of CRL renewal before next update time" },
-                { "name" : "CRLUrlTemplate", "type" : "string",      "comment" : "CRLUrlTemplate specifies a template for CRL URL. The ${ISSUER_ID} variable will be replaced with a SHA of the issuer." },
-                { "name" : "CodesignCA",     "type" : "PrivateCert", "comment" : "CodesignCA specifies the codesign issuing CA cert" },
-                { "name" : "TimestampCA",    "type" : "PrivateCert", "comment" : "TimestampCA specifies the timestamp issuing CA cert" }
             ]
         },
         "TLSInfo" : {
