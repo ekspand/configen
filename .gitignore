@@ -8,10 +8,10 @@ pkg/
 bin/
 .idea
 .tmp/
+.DS_Store
+.docker/
 
 debug
 debug.test
 
-.docker/
-
-.DS_Store
+version/current.go
