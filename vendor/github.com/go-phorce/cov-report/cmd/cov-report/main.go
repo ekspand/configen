@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/go-phorce/cov-report/version"
 	"golang.org/x/tools/cover"
 )
 
@@ -20,6 +21,7 @@ func main() {
 func realMain(outw io.WriteCloser, args []string) int {
 	flags := flag.NewFlagSet(args[0], flag.ContinueOnError)
 	flags.SetOutput(outw)
+	ver := flags.Bool("v", false, "Print version")
 	exc := flags.String("ex", "", "A regex to exclude files from the calculation [file names that match the regex are excluded]")
 	format := flags.String("fmt", "txt", fmt.Sprintf("What format do you want the results in (%v)", strings.Join(keys(formatters), ", ")))
 	out := flags.String("o", "", "Filename to write the results to (or stdout if not set)")
@@ -30,6 +32,12 @@ func realMain(outw io.WriteCloser, args []string) int {
 		fmt.Fprintf(outw, "%s: %s", args[0], err)
 		return 2
 	}
+
+	if *ver {
+		fmt.Printf("cov-report %v\n", version.Current())
+		os.Exit(0)
+	}
+
 	files := flags.Args()
 	if len(files) == 0 {
 		fmt.Fprint(outw, "Please specify one or more coverprofile files to parse\n")

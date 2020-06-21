@@ -7,16 +7,16 @@ dist: xenial
 # updates. Any older versions be considered deprecated. Don't bother testing
 # with them.
 go:
-  - 1.13.x
+  - 1.14.x
 
 env:
-  - GO111MODULE=off
+  - GO111MODULE=on
 
 # Only clone the most recent commit.
 git:
   depth: 1
 
-install: make vars gopath tools
+install: make vars tools
 
 # Don't email me the results of the test runs.
 notifications:
@@ -30,11 +30,11 @@ notifications:
 #   dep ensure -add github.com/golangci/golangci-lint/cmd/golangci-lint
 # ...and adding this to your Gopkg.toml file.
 #   required = ["github.com/golangci/golangci-lint/cmd/golangci-lint"]
-before_script:
-  - make vars generate version
+#before_script:
+#  - make vars generate version
 
 # script always runs to completion (set +e). If we have linter issues AND a
 # failing test, we want to see both. Configure golangci-lint with a
 # .golangci.yml file at the top level of your repo.
 script:
-  - make vars build covtest coveralls # Run all the tests with coverage report
+  - make vars version covtest coveralls # Run all the tests with coverage report

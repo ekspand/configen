@@ -13,6 +13,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"go/build"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,6 +27,7 @@ import (
 	"time"
 
 	"golang.org/x/tools/cover"
+	"golang.org/x/tools/go/buildutil"
 )
 
 /*
@@ -65,9 +67,14 @@ var (
 	show        = flag.Bool("show", false, "Show which package is being tested")
 	customJobID = flag.String("jobid", "", "Custom set job token")
 	jobNumber   = flag.String("jobnumber", "", "Custom set job number")
+	flagName    = flag.String("flagname", os.Getenv("COVERALLS_FLAG_NAME"), "Job flag name, e.g. \"Unit\", \"Functional\", or \"Integration\". Will be shown in the Coveralls UI.")
 
 	parallelFinish = flag.Bool("parallel-finish", false, "finish parallel test")
 )
+
+func init() {
+	flag.Var((*buildutil.TagsFlag)(&build.Default.BuildTags), "tags", buildutil.TagsFlagDoc)
+}
 
 // usage supplants package flag's Usage variable
 var usage = func() {
@@ -93,6 +100,7 @@ type Job struct {
 	ServiceJobNumber   string        `json:"service_job_number,omitempty"`
 	ServicePullRequest string        `json:"service_pull_request,omitempty"`
 	ServiceName        string        `json:"service_name"`
+	FlagName           string        `json:"flag_name,omitempty"`
 	SourceFiles        []*SourceFile `json:"source_files"`
 	Parallel           *bool         `json:"parallel,omitempty"`
 	Git                *Git          `json:"git,omitempty"`
@@ -332,14 +340,8 @@ func process() error {
 		jobID = buildkiteBuildNumber
 	} else if codeshipjobID := os.Getenv("CI_BUILD_ID"); codeshipjobID != "" {
 		jobID = codeshipjobID
-	} else if githubSHA := os.Getenv("GITHUB_SHA"); githubSHA != "" {
-		githubShortSha := githubSHA[0:9]
-		if os.Getenv("GITHUB_EVENT_NAME") == "pull_request" {
-			number := githubEvent["number"].(float64)
-			jobID = fmt.Sprintf(`%s-PR-%d`, githubShortSha, int(number))
-		} else {
-			jobID = githubShortSha
-		}
+	} else if githubRunID := os.Getenv("GITHUB_RUN_ID"); githubRunID != "" {
+		jobID = githubRunID
 	}
 
 	if *parallelFinish {
@@ -398,6 +400,7 @@ func process() error {
 		Git:                collectGitInfo(head),
 		SourceFiles:        sourceFiles,
 		ServiceName:        *service,
+		FlagName:           *flagName,
 	}
 
 	// Only include a job ID if it's known, otherwise, Coveralls looks

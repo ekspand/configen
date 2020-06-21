@@ -1,10 +1,9 @@
 # configen
 
-[![Build Status](https://travis-ci.org/go-phorce/configen.svg?branch=master)](https://travis-ci.org/go-phorce/configen)
+[![Build Status](https://travis-ci.com/go-phorce/configen.svg?branch=master)](https://travis-ci.com/go-phorce/configen)
 [![Coverage Status](https://coveralls.io/repos/github/go-phorce/configen/badge.svg?branch=master)](https://coveralls.io/github/go-phorce/configen?branch=master)
 
 Tool to generate a configuration system, define your config types, and have everything code generated from it. Supports parameter overrides based on hostname, or from an environment variable.
-Expecting GOPATH location is github.com/go-phorce/configen
 
 ## Usage
 
@@ -24,12 +23,7 @@ Or as part of `go generate`
 
 ## Contribution
 
-Before openning VSCODE or running make, run once:
-    ./vscode.sh
-
 * `make all` complete build and test
-* `make get` fetches the pinned dependencies from repos
-* `make devtools` get the dev tools for local development in VSCODE
 * `make build` build the executable tool
 * `make test` run the tests
 * `make testshort` runs the tests skipping the end-to-end tests and the code coverage reporting
@@ -39,7 +33,7 @@ Before openning VSCODE or running make, run once:
 * `make fmt` runs go fmt on the project.
 * `make lint` runs the go linter on the project.
 
-run `make get` once, then run `make build` or `make test` as needed.
+run `make all` once, then run `make build` or `make test` as needed.
 
 First run:
 
