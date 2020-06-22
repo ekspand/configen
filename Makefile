@@ -11,7 +11,7 @@ BUILD_FLAGS=-mod=vendor
 
 default: help
 
-all: clean tools version build covtest
+all: clean tools build covtest
 
 #
 # clean produced files
