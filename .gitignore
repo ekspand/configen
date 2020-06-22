@@ -13,5 +13,3 @@ bin/
 
 debug
 debug.test
-
-version/current.go
