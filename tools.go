@@ -6,8 +6,8 @@ package tools
 
 import (
 	_ "github.com/go-phorce/cov-report/cmd/cov-report"
-	_ "github.com/jteeuwen/go-bindata"
 	_ "github.com/mattn/goveralls"
+	_ "github.com/omeid/go-resources/cmd/resources"
 	_ "github.com/stretchr/testify"
 	_ "golang.org/x/lint/golint"
 	_ "golang.org/x/tools/cmd/godoc"

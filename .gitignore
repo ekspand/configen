@@ -1,6 +1,7 @@
 /.gopath
 /.coverage
 /.rpm
+/.tmp
 /.tools
 
 coverage.out
@@ -10,6 +11,7 @@ bin/
 .tmp/
 .DS_Store
 .docker/
-
 debug
 debug.test
+
+cmd/configen/templates.go
