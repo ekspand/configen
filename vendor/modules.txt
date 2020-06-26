@@ -4,9 +4,6 @@ github.com/davecgh/go-spew/spew
 ## explicit
 github.com/go-phorce/cov-report/cmd/cov-report
 github.com/go-phorce/cov-report/version
-# github.com/jteeuwen/go-bindata v3.0.7+incompatible
-## explicit
-github.com/jteeuwen/go-bindata
 # github.com/juju/errors v0.0.0-20200330140219-3fe23663418f
 ## explicit
 github.com/juju/errors
@@ -17,6 +14,10 @@ github.com/juju/errors
 # github.com/mattn/goveralls v0.0.6
 ## explicit
 github.com/mattn/goveralls
+# github.com/omeid/go-resources v0.0.0-20200113210624-eb442c910d63
+## explicit
+github.com/omeid/go-resources
+github.com/omeid/go-resources/cmd/resources
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/objx v0.2.0

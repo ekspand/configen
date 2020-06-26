@@ -89,30 +89,24 @@ func Test_defaultPacakgeName(t *testing.T) {
 	require.Equal(t, "configen", pn)
 }
 
-func pkgDir(t *testing.T) string {
-	d, err := findPackageDir()
-	require.NoError(t, err)
-	return d
-}
-
 func Test_InvalidType(t *testing.T) {
-	err := generateConfig(pkgDir(t), "testdata/invalid_type_test.json", ".")
+	err := generateConfig("testdata/invalid_type_test.json", ".")
 	assert.Error(t, err)
 	assert.True(t, strings.HasPrefix(err.Error(), "field bob has type Alice which isn't valid"))
 
-	err = generateConfig(pkgDir(t), "testdata/invalid_type_rel_test.json", ".")
+	err = generateConfig("testdata/invalid_type_rel_test.json", ".")
 	assert.Error(t, err)
 	assert.True(t, strings.HasPrefix(err.Error(), "field bob has type Alice which isn't valid"))
 }
 
 func Test_InvalidJson(t *testing.T) {
-	err := generateConfig(pkgDir(t), "testdata/invalid_json_test.json", ".")
+	err := generateConfig("testdata/invalid_json_test.json", ".")
 	assert.Error(t, err)
 	assert.True(t,
 		strings.HasPrefix(err.Error(), "unable to parse configuration definition file testdata/invalid_json_test.json: invalid character 'b' looking for beginning of object"),
 		"got: "+err.Error())
 
-	err = generateConfig(pkgDir(t), "testdata/missing.json", ".")
+	err = generateConfig("testdata/missing.json", ".")
 	assert.Error(t, err)
 	assert.True(t,
 		strings.HasPrefix(err.Error(), "unable to open supplied configuration definition file testdata/missing.json: open testdata/missing.json: no such file or directory"),
@@ -132,7 +126,7 @@ func Test_GenCompileTest(t *testing.T) {
 
 func genCompileTest(t *testing.T, tc os.FileInfo) {
 	pkgName := strings.TrimRight(tc.Name(), ".json")
-	destDir := pkgDir(t) + "/.tmp/" + pkgName
+	destDir := ".tmp/" + pkgName
 
 	err := os.RemoveAll(destDir)
 	require.NoError(t, err)
@@ -145,7 +139,7 @@ func genCompileTest(t *testing.T, tc os.FileInfo) {
 			os.RemoveAll(destDir)
 		}
 	}()
-	err = generateConfig(pkgDir(t), "testdata/"+tc.Name(), destDir)
+	err = generateConfig("testdata/"+tc.Name(), destDir)
 	require.NoError(t, err)
 
 	goBuild(t, pkgName, destDir)

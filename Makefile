@@ -1,6 +1,7 @@
 include .project/gomod-project.mk
 export GO111MODULE=on
 BUILD_FLAGS=-mod=vendor
+COVERAGE_EXCLUSIONS="/rt\.go|/bindata\.go|_test.go|_mock.go|templates.go"
 
 # don't echo execution
 .SILENT:
@@ -11,7 +12,7 @@ BUILD_FLAGS=-mod=vendor
 
 default: help
 
-all: clean tools build covtest
+all: clean tools generate build covtest
 
 #
 # clean produced files
@@ -28,7 +29,7 @@ tools:
 	go install golang.org/x/tools/cmd/godoc
 	go install golang.org/x/tools/cmd/guru
 	go install golang.org/x/lint/golint
-	go install github.com/jteeuwen/go-bindata
+	go install github.com/omeid/go-resources/cmd/resources
 	go install github.com/go-phorce/cov-report/cmd/cov-report
 	go install github.com/mattn/goveralls
 	go install github.com/stretchr/testify
