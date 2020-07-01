@@ -13,5 +13,3 @@ bin/
 .docker/
 debug
 debug.test
-
-cmd/configen/templates.go
