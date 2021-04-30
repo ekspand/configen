@@ -3,6 +3,7 @@
 /.rpm
 /.tmp
 /.tools
+/vendor
 
 coverage.out
 pkg/

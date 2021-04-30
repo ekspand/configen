@@ -851,7 +851,7 @@ func init() {
 				fi: FileInfo{
 					name:    "config.go.template",
 					size:    8518,
-					modTime: time.Unix(0, 1597090594920616929),
+					modTime: time.Unix(0, 1619806641339561998),
 					isDir:   false,
 				},
 			}, "/config_test.go.template": {
@@ -1504,7 +1504,7 @@ func init() {
 				fi: FileInfo{
 					name:    "config_test.go.template",
 					size:    7722,
-					modTime: time.Unix(0, 1597090162419839818),
+					modTime: time.Unix(0, 1619806641339561998),
 					isDir:   false,
 				},
 			},
