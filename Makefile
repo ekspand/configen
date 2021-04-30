@@ -1,6 +1,6 @@
 include .project/gomod-project.mk
 export GO111MODULE=on
-BUILD_FLAGS=-mod=vendor
+BUILD_FLAGS= #-mod=vendor
 COVERAGE_EXCLUSIONS="/rt\.go|/bindata\.go|_test.go|_mock.go|templates.go"
 
 # don't echo execution
@@ -38,5 +38,9 @@ version:
 	gofmt -r '"GIT_VERSION" -> "$(GIT_VERSION)"' version/current.template > version/current.go
 
 build:
-	echo "Building ${PROJ_NAME} with ${BUILD_FLAGS}"
+	echo "Building ${PROJ_NAME}, flags: ${BUILD_FLAGS}"
 	go build ${BUILD_FLAGS} -o ${PROJ_BIN}/${PROJ_NAME} ./cmd/${PROJ_NAME}
+
+coveralls-github:
+	echo "Running coveralls"
+	goveralls -v -coverprofile=coverage.out -service=github -package ./...
